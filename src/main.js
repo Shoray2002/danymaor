@@ -20,12 +20,10 @@ function init() {
   );
   camera.position.set(0, 50, 100);
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xa0a0a0);
-  scene.fog = new THREE.Fog(0xffffff, 1, 1000);
+  scene.background = new THREE.Color(0x6d9ec8);
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
   scene.add(hemiLight);
-
   const dirLight = new THREE.DirectionalLight(0xffffff);
   dirLight.position.set(0, 200, 100);
   dirLight.castShadow = true;
@@ -34,30 +32,36 @@ function init() {
   dirLight.shadow.camera.left = -120;
   dirLight.shadow.camera.right = 120;
   scene.add(dirLight);
+
   // ground
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(2000, 2000),
-    new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false })
+    new THREE.MeshPhongMaterial({ color: 0x6d9ec8, depthWrite: false })
   );
   mesh.rotation.x = -Math.PI / 2;
   mesh.receiveShadow = true;
   scene.add(mesh);
-
   // grid
   const grid = new THREE.GridHelper(2000, 20, 0x000000, 0x000000);
   grid.material.opacity = 0.2;
   grid.material.transparent = true;
   scene.add(grid);
-
+  const textureLoader = new THREE.TextureLoader();
+  const texture = textureLoader.load("../assets/texture.png");
   const loader = new FBXLoader();
   loader.load("../assets/apartment.fbx", function (object) {
+    console.log(object);
     object.traverse(function (child) {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+        child.material.map = texture;
+        child.material.needsUpdate = true;
+        child.material.side = THREE.DoubleSide;
       }
     });
     object.scale.set(10, 10, 10);
+    object.position.set(0, 0, 0);
     scene.add(object);
   });
 
@@ -67,6 +71,7 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.appendChild(renderer.domElement);
+
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
   controls.update();
