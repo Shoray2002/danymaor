@@ -6,18 +6,29 @@ const scale_add = document.getElementById("scale-add");
 const scale_sub = document.getElementById("scale-sub");
 
 scale_add.addEventListener("click", function () {
-  if (selected) {
-    selected.scale.x += 0.5;
-    selected.scale.y += 0.5;
-    selected.scale.z += 0.5;
+  if (
+    selected &&
+    selected.scale.x <= 2.0 &&
+    selected.scale.y <= 2.0 &&
+    selected.scale.z <= 2.0
+  ) {
+    selected.scale.x += 0.1;
+    selected.scale.y += 0.1;
+    selected.scale.z += 0.1;
+    console.log(selected.scale);
   }
 });
 
 scale_sub.addEventListener("click", function () {
-  if (selected) {
-    selected.scale.x -= 0.5;
-    selected.scale.y -= 0.5;
-    selected.scale.z -= 0.5;
+  if (
+    selected &&
+    selected.scale.x > 0.101 &&
+    selected.scale.y > 0.101 &&
+    selected.scale.z > 0.101
+  ) {
+    selected.scale.x -= 0.1;
+    selected.scale.y -= 0.1;
+    selected.scale.z -= 0.1;
   }
 });
 
@@ -175,7 +186,8 @@ function onKeyDown(event) {
       raycaster.setFromCamera(mouse, camera);
       const intersects = raycaster.intersectObjects(objects);
       if (intersects.length > 1) {
-        selected = intersects[1].object;
+        console.log(intersects[0].object.name);
+        selected = intersects[0].object;
       }
   }
 }
