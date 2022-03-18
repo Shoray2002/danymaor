@@ -9,19 +9,3 @@ canvas {
   top: 0;
   left: 0;
 }
-
-#info {
-  color: rgb(255, 238, 0);
-  position: absolute;
-  bottom: 0px;
-  width: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-  text-align: center;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  pointer-events: none;
-  z-index: 1;
-}
