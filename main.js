@@ -6,19 +6,28 @@ const scale_add = document.getElementById("scale-add");
 const scale_sub = document.getElementById("scale-sub");
 
 scale_add.addEventListener("click", function () {
-  console.log("add");
+  if (selected) {
+    selected.scale.x += 0.5;
+    selected.scale.y += 0.5;
+    selected.scale.z += 0.5;
+  }
 });
 
 scale_sub.addEventListener("click", function () {
-  console.log("sub");
+  if (selected) {
+    selected.scale.x -= 0.5;
+    selected.scale.y -= 0.5;
+    selected.scale.z -= 0.5;
+  }
 });
 
 // importing the threejs library from the node_modules folder
 // importing the OrbitControls that allows the camera to move around the scene using the mouse
 // importing the FBXLoader which is used to load the FBX model file
 
-let camera, scene, renderer, controls; //basic variables
+let camera, scene, renderer, controls, selected; //basic variables
 let objects = [];
+let pointer = new THREE.Vector2();
 // variables to keep track of the movement of the camera
 let moveForward = false;
 let moveBackward = false;
@@ -124,10 +133,10 @@ function init() {
   controls.update();
 
   // adding the event listeners
-  window.addEventListener("resize", onWindowResize, false);
-  window.addEventListener("keydown", onKeyDown, false);
-  window.addEventListener("keyup", onKeyUp, false);
-  window.addEventListener("mousemove", onMouseMove, false);
+  window.addEventListener("resize", onWindowResize);
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
+  window.addEventListener("mousemove", onMouseMove);
 }
 
 // function to resize the scene
@@ -157,6 +166,17 @@ function onKeyDown(event) {
     case 68: // d
       moveRight = true;
       break;
+    // x
+    case 88:
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      mouse.x = pointer.x;
+      mouse.y = pointer.y;
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(objects);
+      if (intersects.length > 1) {
+        selected = intersects[1].object;
+      }
   }
 }
 
@@ -183,15 +203,8 @@ function onKeyUp(event) {
 }
 
 function onMouseMove(event) {
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(objects);
-  if (intersects.length > 0) {
-    console.log(intersects[0].object.name);
-  }
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
 // function to animate the scene
