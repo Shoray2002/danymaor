@@ -17,7 +17,8 @@ scale_sub.addEventListener("click", function () {
 // importing the OrbitControls that allows the camera to move around the scene using the mouse
 // importing the FBXLoader which is used to load the FBX model file
 
-let camera, scene, renderer, controls, objects; //basic variables
+let camera, scene, renderer, controls; //basic variables
+let objects = [];
 // variables to keep track of the movement of the camera
 let moveForward = false;
 let moveBackward = false;
@@ -76,6 +77,8 @@ function init() {
 
   mesh.rotation.x = -Math.PI / 2;
   mesh.receiveShadow = true;
+  mesh.name = "ground";
+  objects.push(mesh);
   scene.add(mesh);
 
   // loading the FBX model and texture
@@ -87,6 +90,7 @@ function init() {
     // modifying the FBX model
     object.traverse(function (child) {
       if (child.isMesh) {
+        objects.push(child);
         child.castShadow = true; // cast shadow
         child.receiveShadow = true; // receive shadow
         child.material.map = texture; // setting the texture onto the model
@@ -96,10 +100,14 @@ function init() {
       }
     });
     // increasing the size of the model
+    object.name = "apartment";
     object.scale.set(20, 20, 20);
     object.position.set(0, 0, 0);
+    // objects.push(object);
     scene.add(object);
   });
+
+  console.log(objects);
 
   // initializing the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -119,6 +127,7 @@ function init() {
   window.addEventListener("resize", onWindowResize, false);
   window.addEventListener("keydown", onKeyDown, false);
   window.addEventListener("keyup", onKeyUp, false);
+  window.addEventListener("mousemove", onMouseMove, false);
 }
 
 // function to resize the scene
@@ -170,6 +179,18 @@ function onKeyUp(event) {
     case 68: // d
       moveRight = false;
       break;
+  }
+}
+
+function onMouseMove(event) {
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(objects);
+  if (intersects.length > 0) {
+    console.log(intersects[0].object.name);
   }
 }
 
