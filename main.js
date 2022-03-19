@@ -1,15 +1,15 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
+import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
 // importing the threejs library from the node_modules folder
 // importing the OrbitControls that allows the camera to move around the scene using the mouse
 // importing the FBXLoader which is used to load the FBX model file
 
-const scale_add = document.getElementById("scale-add");
-const scale_sub = document.getElementById("scale-sub");
-const rotate_left = document.getElementById("rotate-left");
-const rotate_right = document.getElementById("rotate-right");
-let camera, scene, renderer, controls, selected; //basic variables
+const scale = document.getElementById("scale");
+const rotate = document.getElementById("rotate");
+const translate = document.getElementById("translate");
+let camera, scene, renderer, controls, selected, transform; //basic variables
 let objects = [];
 let pointer = new THREE.Vector2();
 // variables to keep track of the movement of the camera
@@ -77,7 +77,7 @@ function init() {
 
   // loading the FBX model and texture
   const textureLoader = new THREE.TextureLoader();
-  const texture = textureLoader.load("./assets/texture.png");
+  const texture = textureLoader.load("./assets/apartment.png");
 
   const model = new FBXLoader();
   model.load("./assets/apartment.fbx", function (object) {
@@ -96,7 +96,7 @@ function init() {
     // increasing the size of the model
     object.name = "apartment";
     object.scale.set(20, 20, 20);
-    object.position.set(0, 0, 0);
+    object.position.set(-100, 0, 0);
     // objects.push(object);
     scene.add(object);
   });
@@ -115,7 +115,7 @@ function init() {
     });
     // increasing the size of the model
     object.scale.set(20, 20, 20);
-    object.position.set(200, 0, 0);
+    object.position.set(100, 0, 0);
     scene.add(object);
   });
 
@@ -132,48 +132,30 @@ function init() {
   controls.target.set(0, 0, 0);
   controls.update();
 
+  transform = new TransformControls(camera, renderer.domElement);
+  transform.addEventListener("dragging-changed", function (event) {
+    controls.enabled = !event.value;
+  });
+  scene.add(transform);
   // adding the event listeners
   window.addEventListener("resize", onWindowResize);
-  window.addEventListener("keydown", onKeyDown);
-  window.addEventListener("keyup", onKeyUp);
+  window.addEventListener("keydown", onXDown);
   window.addEventListener("mousemove", onMouseMove);
 }
 
-scale_add.addEventListener("click", function () {
-  if (
-    selected &&
-    selected.scale.x <= 2.0 &&
-    selected.scale.y <= 2.0 &&
-    selected.scale.z <= 2.0
-  ) {
-    selected.scale.x += 0.1;
-    selected.scale.y += 0.1;
-    selected.scale.z += 0.1;
-    console.log(selected.scale);
-  }
-});
-
-scale_sub.addEventListener("click", function () {
-  if (
-    selected &&
-    selected.scale.x > 0.101 &&
-    selected.scale.y > 0.101 &&
-    selected.scale.z > 0.101
-  ) {
-    selected.scale.x -= 0.1;
-    selected.scale.y -= 0.1;
-    selected.scale.z -= 0.1;
-  }
-});
-
-rotate_left.addEventListener("click", function () {
+scale.addEventListener("click", function () {
   if (selected) {
-    selected.rotation.y += 0.1;
+    transform.setMode("scale");
   }
 });
-rotate_right.addEventListener("click", function () {
+translate.addEventListener("click", function () {
   if (selected) {
-    selected.rotation.y -= 0.1;
+    transform.setMode("translate");
+  }
+});
+rotate.addEventListener("click", function () {
+  if (selected) {
+    transform.setMode("rotate");
   }
 });
 
@@ -185,32 +167,8 @@ function onWindowResize() {
 }
 
 // function when a key is pressed
-function onKeyDown(event) {
+function onXDown(event) {
   switch (event.keyCode) {
-    case 38: // up
-    case 87: // w
-      moveForward = true;
-      break;
-    case 37: // left
-    case 65: // a
-      moveLeft = true;
-      break;
-    case 40: // down
-    case 83: // s
-      moveBackward = true;
-      break;
-    case 39: // right
-    case 68: // d
-      moveRight = true;
-      break;
-    // e
-    case 69:
-      moveUp = true;
-      break;
-    // q
-    case 81:
-      moveDown = true;
-      break;
     // x
     case 88:
       const raycaster = new THREE.Raycaster();
@@ -227,39 +185,11 @@ function onKeyDown(event) {
         objects.forEach((object) => {
           if (object !== selected && object.name !== "ground") {
             object.material.color.set(cloneColor);
+            transform.attach(selected);
+            transform.setMode("translate");
           }
         });
       }
-      break;
-  }
-}
-
-// function when a key is released
-function onKeyUp(event) {
-  switch (event.keyCode) {
-    case 38: // up
-    case 87: // w
-      moveForward = false;
-      break;
-    case 37: // left
-    case 65: // a
-      moveLeft = false;
-      break;
-    case 40: // down
-    case 83: // s
-      moveBackward = false;
-      break;
-    case 39: // right
-    case 68: // d
-      moveRight = false;
-      break;
-    // e
-    case 69:
-      moveUp = false;
-      break;
-    // q
-    case 81:
-      moveDown = false;
       break;
   }
 }
@@ -271,25 +201,6 @@ function onMouseMove(event) {
 
 // function to animate the scene
 function animate() {
-  // move the camera if any of the movement keys are pressed
-  if (moveForward) {
-    selected.translateZ(-0.1);
-  }
-  if (moveBackward) {
-    selected.translateZ(0.1);
-  }
-  if (moveLeft) {
-    selected.translateX(-0.1);
-  }
-  if (moveRight) {
-    selected.translateX(0.1);
-  }
-  if (moveUp) {
-    selected.translateY(0.1);
-  }
-  if (moveDown) {
-    selected.translateY(-0.1);
-  }
   requestAnimationFrame(animate);
 
   renderer.render(scene, camera);
