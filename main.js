@@ -97,7 +97,6 @@ function init() {
     object.name = "apartment";
     object.scale.set(20, 20, 20);
     object.position.set(-100, 0, 0);
-    // objects.push(object);
     scene.add(object);
   });
   model.load("./assets/apartment.fbx", function (object) {
@@ -139,8 +138,7 @@ function init() {
   scene.add(transform);
   // adding the event listeners
   window.addEventListener("resize", onWindowResize);
-  window.addEventListener("keydown", onXDown);
-  window.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("click", onDocumentMouseDown);
 }
 
 scale.addEventListener("click", function () {
@@ -166,42 +164,28 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// function when a key is pressed
-function onXDown(event) {
-  switch (event.keyCode) {
-    // x
-    case 88:
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-      mouse.x = pointer.x;
-      mouse.y = pointer.y;
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(objects);
-      if (intersects.length > 1) {
-        console.log(intersects[0].object.name);
-        selected = intersects[0].object;
-        let cloneColor = selected.material.color.clone();
-        selected.material.color.set(0x8fd3fe);
-        objects.forEach((object) => {
-          if (object !== selected && object.name !== "ground") {
-            object.material.color.set(cloneColor);
-            transform.attach(selected);
-            transform.setMode("translate");
-          }
-        });
+function onDocumentMouseDown(event) {
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(objects);
+  if (intersects.length > 1) {
+    console.log(intersects[0].object.name);
+    selected = intersects[0].object;
+    selected.material.color.set(0x8fd3fe);
+    objects.forEach((object) => {
+      if (object !== selected && object.name !== "ground") {
+        object.material.color.set(0xffffff);
+        transform.attach(selected);
       }
-      break;
+    });
   }
-}
-
-function onMouseMove(event) {
-  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
 // function to animate the scene
 function animate() {
   requestAnimationFrame(animate);
-
   renderer.render(scene, camera);
 }
