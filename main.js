@@ -1,41 +1,14 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
-
-const scale_add = document.getElementById("scale-add");
-const scale_sub = document.getElementById("scale-sub");
-
-scale_add.addEventListener("click", function () {
-  if (
-    selected &&
-    selected.scale.x <= 2.0 &&
-    selected.scale.y <= 2.0 &&
-    selected.scale.z <= 2.0
-  ) {
-    selected.scale.x += 0.1;
-    selected.scale.y += 0.1;
-    selected.scale.z += 0.1;
-    console.log(selected.scale);
-  }
-});
-
-scale_sub.addEventListener("click", function () {
-  if (
-    selected &&
-    selected.scale.x > 0.101 &&
-    selected.scale.y > 0.101 &&
-    selected.scale.z > 0.101
-  ) {
-    selected.scale.x -= 0.1;
-    selected.scale.y -= 0.1;
-    selected.scale.z -= 0.1;
-  }
-});
-
 // importing the threejs library from the node_modules folder
 // importing the OrbitControls that allows the camera to move around the scene using the mouse
 // importing the FBXLoader which is used to load the FBX model file
 
+const scale_add = document.getElementById("scale-add");
+const scale_sub = document.getElementById("scale-sub");
+const rotate_left = document.getElementById("rotate-left");
+const rotate_right = document.getElementById("rotate-right");
 let camera, scene, renderer, controls, selected; //basic variables
 let objects = [];
 let pointer = new THREE.Vector2();
@@ -88,10 +61,9 @@ function init() {
 
   // initializing the ground
   const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(2000, 2000),
+    new THREE.PlaneGeometry(4000, 4000),
     new THREE.MeshPhongMaterial({
       color: 0x6d9ec8,
-      side: THREE.DoubleSide,
     })
   );
 
@@ -126,6 +98,25 @@ function init() {
     // objects.push(object);
     scene.add(object);
   });
+  model.load("./assets/apartment.fbx", function (object) {
+    // modifying the FBX model
+    object.traverse(function (child) {
+      if (child.isMesh) {
+        objects.push(child);
+        child.castShadow = true; // cast shadow
+        child.receiveShadow = true; // receive shadow
+        child.material.map = texture; // setting the texture onto the model
+        child.material.needsUpdate = true; // updating the material
+        // make the texture visible from both sides of the model surface
+        // child.material.side = THREE.DoubleSide;
+      }
+    });
+    // increasing the size of the model
+    object.scale.set(20, 20, 20);
+    object.position.set(200, 0, 0);
+    // objects.push(object);
+    scene.add(object);
+  });
 
   console.log(objects);
 
@@ -140,7 +131,6 @@ function init() {
   // initializing the controls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
-  controls.enableZoom = false; // disabling the zoom controls
   controls.update();
 
   // adding the event listeners
@@ -150,11 +140,48 @@ function init() {
   window.addEventListener("mousemove", onMouseMove);
 }
 
+scale_add.addEventListener("click", function () {
+  if (
+    selected &&
+    selected.scale.x <= 2.0 &&
+    selected.scale.y <= 2.0 &&
+    selected.scale.z <= 2.0
+  ) {
+    selected.scale.x += 0.1;
+    selected.scale.y += 0.1;
+    selected.scale.z += 0.1;
+    console.log(selected.scale);
+  }
+});
+
+scale_sub.addEventListener("click", function () {
+  if (
+    selected &&
+    selected.scale.x > 0.101 &&
+    selected.scale.y > 0.101 &&
+    selected.scale.z > 0.101
+  ) {
+    selected.scale.x -= 0.1;
+    selected.scale.y -= 0.1;
+    selected.scale.z -= 0.1;
+  }
+});
+
+rotate_left.addEventListener("click", function () {
+  if (selected) {
+    selected.rotation.y += 0.1;
+  }
+});
+rotate_right.addEventListener("click", function () {
+  if (selected) {
+    selected.rotation.y -= 0.1;
+  }
+});
+
 // function to resize the scene
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
@@ -188,7 +215,16 @@ function onKeyDown(event) {
       if (intersects.length > 1) {
         console.log(intersects[0].object.name);
         selected = intersects[0].object;
+        let cloneColor = selected.material.color.clone();
+        // console.log(selected.material.color);
+        selected.material.color.set(0x8fd3fe);
+        objects.forEach((object) => {
+          if (object !== selected && object.name !== "ground") {
+            object.material.color.set(cloneColor);
+          }
+        });
       }
+      break;
   }
 }
 
@@ -223,10 +259,10 @@ function onMouseMove(event) {
 function animate() {
   // move the camera if any of the movement keys are pressed
   if (moveForward) {
-    camera.translateZ(-1);
+    camera.translateY(1);
   }
   if (moveBackward) {
-    camera.translateZ(1);
+    camera.translateY(-1);
   }
   if (moveLeft) {
     camera.translateX(-1);
