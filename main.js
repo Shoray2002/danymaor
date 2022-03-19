@@ -17,6 +17,8 @@ let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
+let moveUp = false;
+let moveDown = false;
 
 // function calls
 init();
@@ -114,11 +116,8 @@ function init() {
     // increasing the size of the model
     object.scale.set(20, 20, 20);
     object.position.set(200, 0, 0);
-    // objects.push(object);
     scene.add(object);
   });
-
-  console.log(objects);
 
   // initializing the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -204,6 +203,14 @@ function onKeyDown(event) {
     case 68: // d
       moveRight = true;
       break;
+    // e
+    case 69:
+      moveUp = true;
+      break;
+    // q
+    case 81:
+      moveDown = true;
+      break;
     // x
     case 88:
       const raycaster = new THREE.Raycaster();
@@ -216,7 +223,6 @@ function onKeyDown(event) {
         console.log(intersects[0].object.name);
         selected = intersects[0].object;
         let cloneColor = selected.material.color.clone();
-        // console.log(selected.material.color);
         selected.material.color.set(0x8fd3fe);
         objects.forEach((object) => {
           if (object !== selected && object.name !== "ground") {
@@ -247,6 +253,14 @@ function onKeyUp(event) {
     case 68: // d
       moveRight = false;
       break;
+    // e
+    case 69:
+      moveUp = false;
+      break;
+    // q
+    case 81:
+      moveDown = false;
+      break;
   }
 }
 
@@ -259,16 +273,22 @@ function onMouseMove(event) {
 function animate() {
   // move the camera if any of the movement keys are pressed
   if (moveForward) {
-    camera.translateY(1);
+    selected.translateZ(-0.1);
   }
   if (moveBackward) {
-    camera.translateY(-1);
+    selected.translateZ(0.1);
   }
   if (moveLeft) {
-    camera.translateX(-1);
+    selected.translateX(-0.1);
   }
   if (moveRight) {
-    camera.translateX(1);
+    selected.translateX(0.1);
+  }
+  if (moveUp) {
+    selected.translateY(0.1);
+  }
+  if (moveDown) {
+    selected.translateY(-0.1);
   }
   requestAnimationFrame(animate);
 
