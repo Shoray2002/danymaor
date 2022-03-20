@@ -139,6 +139,8 @@ function init() {
   // adding the event listeners
   window.addEventListener("resize", onWindowResize);
   document.addEventListener("click", onDocumentMouseDown);
+  document.addEventListener("keydown", onDocumentKeyDown);
+  document.addEventListener("keyup", onDocumentKeyUp);
 }
 
 scale.addEventListener("click", function () {
@@ -184,8 +186,84 @@ function onDocumentMouseDown(event) {
   }
 }
 
+function onDocumentKeyDown(event) {
+  switch (event.keyCode) {
+    case 38: // up
+    case 87: // w
+      moveForward = true;
+      break;
+    case 37: // left
+    case 65: // a
+      moveLeft = true;
+      break;
+    case 40: // down
+    case 83: // s
+      moveBackward = true;
+      break;
+    case 39: // right
+    case 68: // d
+      moveRight = true;
+      break;
+    // e
+    case 69:
+      moveUp = true;
+      break;
+    // q
+    case 81:
+      moveDown = true;
+      break;
+  }
+}
+
+function onDocumentKeyUp(event) {
+  switch (event.keyCode) {
+    case 38: // up
+    case 87: // w
+      moveForward = false;
+      break;
+    case 37: // left
+    case 65: // a
+      moveLeft = false;
+      break;
+    case 40: // down
+    case 83: // s
+      moveBackward = false;
+      break;
+    case 39: // right
+    case 68: // d
+      moveRight = false;
+      break;
+    // e
+    case 69:
+      moveUp = false;
+      break;
+    // q
+    case 81:
+      moveDown = false;
+      break;
+  }
+}
+
 // function to animate the scene
 function animate() {
+  if (moveForward) {
+    selected.translateZ(-0.1);
+  }
+  if (moveBackward) {
+    selected.translateZ(0.1);
+  }
+  if (moveLeft) {
+    selected.translateX(-0.1);
+  }
+  if (moveRight) {
+    selected.translateX(0.1);
+  }
+  if (moveUp) {
+    selected.translateY(0.1);
+  }
+  if (moveDown) {
+    selected.translateY(-0.1);
+  }
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
