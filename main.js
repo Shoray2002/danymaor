@@ -212,6 +212,12 @@ function onDocumentKeyDown(event) {
     case 81:
       moveDown = true;
       break;
+
+    // esc
+    case 27:
+      transform.detach(selected);
+      selected.material.color.set(0xffffff);
+      selected = null;
   }
 }
 
@@ -246,23 +252,44 @@ function onDocumentKeyUp(event) {
 
 // function to animate the scene
 function animate() {
-  if (moveForward) {
-    selected.translateZ(-0.1);
-  }
-  if (moveBackward) {
-    selected.translateZ(0.1);
-  }
-  if (moveLeft) {
-    selected.translateX(-0.1);
-  }
-  if (moveRight) {
-    selected.translateX(0.1);
-  }
-  if (moveUp) {
-    selected.translateY(0.1);
-  }
-  if (moveDown) {
-    selected.translateY(-0.1);
+  if (selected) {
+    if (moveForward) {
+      selected.translateZ(-0.1);
+    }
+    if (moveBackward) {
+      selected.translateZ(0.1);
+    }
+    if (moveLeft) {
+      selected.translateX(-0.1);
+    }
+    if (moveRight) {
+      selected.translateX(0.1);
+    }
+    if (moveUp) {
+      selected.translateY(0.1);
+    }
+    if (moveDown) {
+      selected.translateY(-0.1);
+    }
+  } else {
+    if (moveForward) {
+      camera.translateZ(-1);
+    }
+    if (moveBackward) {
+      camera.translateZ(1);
+    }
+    if (moveLeft) {
+      camera.translateX(-1);
+    }
+    if (moveRight) {
+      camera.translateX(1);
+    }
+    if (moveUp) {
+      camera.translateY(1);
+    }
+    if (moveDown) {
+      camera.translateY(-1);
+    }
   }
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
