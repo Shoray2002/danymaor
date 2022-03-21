@@ -1,7 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
+import { FirstPersonControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/FirstPersonControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
+const clock = new THREE.Clock();
 // importing the threejs library from the node_modules folder
 // importing the OrbitControls that allows the camera to move around the scene using the mouse
 // importing the FBXLoader which is used to load the FBX model file
@@ -9,7 +11,8 @@ import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/j
 const scale = document.getElementById("scale");
 const rotate = document.getElementById("rotate");
 const translate = document.getElementById("translate");
-let camera, scene, renderer, controls, selected, transform; //basic variables
+const control = document.getElementById("control");
+let camera, scene, renderer, fpControl, selected, transform; //basic variables
 let objects = [];
 let pointer = new THREE.Vector2();
 // variables to keep track of the movement of the camera
@@ -38,7 +41,7 @@ function init() {
     1,
     1000
   );
-  camera.position.set(-80, 100, 200);
+  camera.position.set(-80, 40, 200);
 
   // initializing the scene
   scene = new THREE.Scene();
@@ -127,13 +130,20 @@ function init() {
   container.appendChild(renderer.domElement);
 
   // initializing the controls
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 0, 0);
-  controls.update();
+  fpControl = new FirstPersonControls(camera, renderer.domElement);
+  fpControl.movementSpeed = 150;
+  fpControl.lookSpeed = 0.01;
+  fpControl.lookVertical = true;
+  fpControl.constrainVertical = true;
+  fpControl.verticalMin = 1.0;
+  fpControl.verticalMax = 2.0;
+  fpControl.lon = -90;
+  fpControl.lat = 0;
 
+  
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
-    controls.enabled = !event.value;
+    fpControl.enabled = !event.value;
   });
   scene.add(transform);
   // adding the event listeners
@@ -158,12 +168,20 @@ rotate.addEventListener("click", function () {
     transform.setMode("rotate");
   }
 });
+control.addEventListener("click", function () {
+  if (fpControl.enabled) {
+    fpControl.enabled = false;
+  } else {
+    fpControl.enabled = true;
+  }
+});
 
 // function to resize the scene
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  fpControl.handleResize();
 }
 
 function onDocumentMouseDown(event) {
@@ -291,6 +309,7 @@ function animate() {
       camera.translateY(-1);
     }
   }
+  fpControl.update(clock.getDelta());
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
