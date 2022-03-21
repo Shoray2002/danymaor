@@ -121,6 +121,25 @@ function init() {
     object.position.set(100, 0, 0);
     scene.add(object);
   });
+  model.load("./assets/apartment.fbx", function (object) {
+    // modifying the FBX model
+    object.traverse(function (child) {
+      if (child.isMesh) {
+        objects.push(child);
+        child.castShadow = true; // cast shadow
+        child.receiveShadow = true; // receive shadow
+        child.material.map = texture; // setting the texture onto the model
+        child.material.needsUpdate = true; // updating the material
+        // make the texture visible from both sides of the model surface
+        // child.material.side = THREE.DoubleSide;
+      }
+    });
+    // increasing the size of the model
+    object.name = "apartment3";
+    object.scale.set(20, 20, 20);
+    object.position.set(100, 0, 200);
+    scene.add(object);
+  });
 
   // initializing the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -174,7 +193,6 @@ delete_object.addEventListener("click", function () {
       }
     });
     transform.detach(selected);
-    selected = null;
   }
 });
 
@@ -204,10 +222,10 @@ function onDocumentMouseDown(event) {
     console.log(intersects[0].object.parent.name);
     selected = intersects[0].object;
     selected.material.color.set(0x8fd3fe);
+    transform.attach(selected);
     objects.forEach((object) => {
       if (object !== selected && object.name !== "ground") {
         object.material.color.set(0xffffff);
-        transform.attach(selected);
       }
     });
   }
