@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
 import { FirstPersonControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/FirstPersonControls.js";
+import { FlyControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/FlyControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
 const clock = new THREE.Clock();
 // importing the threejs library from the node_modules folder
@@ -12,7 +12,7 @@ const scale = document.getElementById("scale");
 const rotate = document.getElementById("rotate");
 const translate = document.getElementById("translate");
 const control = document.getElementById("control");
-let camera, scene, renderer, fpControl, selected, transform; //basic variables
+let camera, scene, renderer, fpControls, flyControls, selected, transform; //basic variables
 let objects = [];
 let pointer = new THREE.Vector2();
 // variables to keep track of the movement of the camera
@@ -130,20 +130,26 @@ function init() {
   container.appendChild(renderer.domElement);
 
   // initializing the controls
-  fpControl = new FirstPersonControls(camera, renderer.domElement);
-  fpControl.movementSpeed = 150;
-  fpControl.lookSpeed = 0.01;
-  fpControl.lookVertical = true;
-  fpControl.constrainVertical = true;
-  fpControl.verticalMin = 1.0;
-  fpControl.verticalMax = 2.0;
-  fpControl.lon = -90;
-  fpControl.lat = 0;
+  fpControls = new FirstPersonControls(camera, renderer.domElement);
+  fpControls.movementSpeed = 150;
+  fpControls.lookSpeed = 0.01;
+  fpControls.lookVertical = true;
+  fpControls.constrainVertical = true;
+  fpControls.verticalMin = 1.0;
+  fpControls.verticalMax = 2.0;
+  fpControls.lon = -90;
+  fpControls.lat = 0;
 
-  
+  flyControls = new FlyControls(camera, renderer.domElement);
+  flyControls.movementSpeed = 150;
+  flyControls.rollSpeed = Math.PI / 24;
+  flyControls.autoForward = false;
+  flyControls.dragToLook = true;
+  flyControls.enabled = false;
+
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
-    fpControl.enabled = !event.value;
+    fpControls.enabled = !event.value;
   });
   scene.add(transform);
   // adding the event listeners
@@ -169,11 +175,19 @@ rotate.addEventListener("click", function () {
   }
 });
 control.addEventListener("click", function () {
-  if (fpControl.enabled) {
-    fpControl.enabled = false;
+  if (fpControls.enabled) {
+    flyControls.enabled = true;
+    fpControls.enabled = false;
+    console.log("fly controls enabled");
+    control.innerHTML = "Controls: Fly";
   } else {
-    fpControl.enabled = true;
+    flyControls.enabled = false;
+    fpControls.enabled = true;
+    console.log("fp controls enabled");
+    control.innerText = "Controls: First Person";
   }
+  flyControls.update(clock.getDelta());
+  fpControls.update(clock.getDelta());
 });
 
 // function to resize the scene
@@ -181,7 +195,7 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  fpControl.handleResize();
+  fpControls.handleResize();
 }
 
 function onDocumentMouseDown(event) {
@@ -309,7 +323,11 @@ function animate() {
       camera.translateY(-1);
     }
   }
-  fpControl.update(clock.getDelta());
+  if (fpControls.enabled) {
+    fpControls.update(clock.getDelta());
+  } else {
+    flyControls.update(clock.getDelta());
+  }
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
