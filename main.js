@@ -9,9 +9,10 @@ import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/j
 const scale = document.getElementById("scale");
 const rotate = document.getElementById("rotate");
 const translate = document.getElementById("translate");
+const delete_object = document.getElementById("delete");
+const log = document.getElementById("log");
 let camera, scene, renderer, controls, selected, transform; //basic variables
 let objects = [];
-let pointer = new THREE.Vector2();
 // variables to keep track of the movement of the camera
 let moveForward = false;
 let moveBackward = false;
@@ -49,6 +50,7 @@ function init() {
   // https://threejs.org/docs/?q=hemis#api/en/lights/HemisphereLight
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
+  hemiLight.name = "hemiLight";
   scene.add(hemiLight);
 
   // https://threejs.org/docs/?q=dire#api/en/lights/DirectionalLight
@@ -59,6 +61,7 @@ function init() {
   dirLight.shadow.camera.bottom = -100;
   dirLight.shadow.camera.left = -120;
   dirLight.shadow.camera.right = 120;
+  dirLight.name = "dirLight";
   scene.add(dirLight);
 
   // initializing the ground
@@ -113,6 +116,7 @@ function init() {
       }
     });
     // increasing the size of the model
+    object.name = "apartment2";
     object.scale.set(20, 20, 20);
     object.position.set(100, 0, 0);
     scene.add(object);
@@ -135,6 +139,7 @@ function init() {
   transform.addEventListener("dragging-changed", function (event) {
     controls.enabled = !event.value;
   });
+  transform.name = "transform";
   scene.add(transform);
   // adding the event listeners
   window.addEventListener("resize", onWindowResize);
@@ -158,6 +163,28 @@ rotate.addEventListener("click", function () {
     transform.setMode("rotate");
   }
 });
+delete_object.addEventListener("click", function () {
+  if (selected) {
+    console.log("Deleted : " + selected.parent.name);
+    var selectedObject = scene.getObjectByName(selected.parent.name);
+    scene.remove(selectedObject);
+    objects.forEach((object) => {
+      if (object.parent.name == selected.parent.name) {
+        objects.splice(objects.indexOf(object), 1);
+      }
+    });
+    transform.detach(selected);
+    selected = null;
+  }
+});
+
+log.addEventListener("click", function () {
+  let temp = [];
+  for (var i = 0; i < scene.children.length; i++) {
+    temp.push(scene.children[i].name);
+  }
+  console.log(temp);
+});
 
 // function to resize the scene
 function onWindowResize() {
@@ -174,7 +201,7 @@ function onDocumentMouseDown(event) {
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(objects);
   if (intersects.length > 1) {
-    console.log(intersects[0].object.name);
+    console.log(intersects[0].object.parent.name);
     selected = intersects[0].object;
     selected.material.color.set(0x8fd3fe);
     objects.forEach((object) => {
@@ -212,7 +239,6 @@ function onDocumentKeyDown(event) {
     case 81:
       moveDown = true;
       break;
-
     // esc
     case 27:
       transform.detach(selected);
