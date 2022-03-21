@@ -1,9 +1,7 @@
 import * as THREE from "three";
+import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
-import { FirstPersonControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/FirstPersonControls.js";
-import { FlyControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/FlyControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
-const clock = new THREE.Clock();
 // importing the threejs library from the node_modules folder
 // importing the OrbitControls that allows the camera to move around the scene using the mouse
 // importing the FBXLoader which is used to load the FBX model file
@@ -11,14 +9,9 @@ const clock = new THREE.Clock();
 const scale = document.getElementById("scale");
 const rotate = document.getElementById("rotate");
 const translate = document.getElementById("translate");
-<<<<<<< HEAD
 const delete_object = document.getElementById("delete");
 const log = document.getElementById("log");
 let camera, scene, renderer, controls, selected, transform; //basic variables
-=======
-const control = document.getElementById("control");
-let camera, scene, renderer, fpControls, flyControls, selected, transform; //basic variables
->>>>>>> 568b379aa4e0995bab3ffe6ac407c9cd78a06b22
 let objects = [];
 // variables to keep track of the movement of the camera
 let moveForward = false;
@@ -46,7 +39,7 @@ function init() {
     1,
     1000
   );
-  camera.position.set(-80, 40, 200);
+  camera.position.set(-80, 100, 200);
 
   // initializing the scene
   scene = new THREE.Scene();
@@ -138,26 +131,13 @@ function init() {
   container.appendChild(renderer.domElement);
 
   // initializing the controls
-  fpControls = new FirstPersonControls(camera, renderer.domElement);
-  fpControls.movementSpeed = 150;
-  fpControls.lookSpeed = 0.01;
-  fpControls.lookVertical = true;
-  fpControls.constrainVertical = true;
-  fpControls.verticalMin = 1.0;
-  fpControls.verticalMax = 2.0;
-  fpControls.lon = -90;
-  fpControls.lat = 0;
-
-  flyControls = new FlyControls(camera, renderer.domElement);
-  flyControls.movementSpeed = 150;
-  flyControls.rollSpeed = Math.PI / 24;
-  flyControls.autoForward = false;
-  flyControls.dragToLook = true;
-  flyControls.enabled = false;
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 0, 0);
+  controls.update();
 
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
-    fpControls.enabled = !event.value;
+    controls.enabled = !event.value;
   });
   transform.name = "transform";
   scene.add(transform);
@@ -183,7 +163,6 @@ rotate.addEventListener("click", function () {
     transform.setMode("rotate");
   }
 });
-<<<<<<< HEAD
 delete_object.addEventListener("click", function () {
   if (selected) {
     console.log("Deleted : " + selected.parent.name);
@@ -205,22 +184,6 @@ log.addEventListener("click", function () {
     temp.push(scene.children[i].name);
   }
   console.log(temp);
-=======
-control.addEventListener("click", function () {
-  if (fpControls.enabled) {
-    flyControls.enabled = true;
-    fpControls.enabled = false;
-    console.log("fly controls enabled");
-    control.innerHTML = "Controls: Fly";
-  } else {
-    flyControls.enabled = false;
-    fpControls.enabled = true;
-    console.log("fp controls enabled");
-    control.innerText = "Controls: First Person";
-  }
-  flyControls.update(clock.getDelta());
-  fpControls.update(clock.getDelta());
->>>>>>> 568b379aa4e0995bab3ffe6ac407c9cd78a06b22
 });
 
 // function to resize the scene
@@ -228,7 +191,6 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
-  fpControls.handleResize();
 }
 
 function onDocumentMouseDown(event) {
@@ -354,11 +316,6 @@ function animate() {
     if (moveDown) {
       camera.translateY(-1);
     }
-  }
-  if (fpControls.enabled) {
-    fpControls.update(clock.getDelta());
-  } else {
-    flyControls.update(clock.getDelta());
   }
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
