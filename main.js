@@ -1,17 +1,19 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
+import { FlyControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/FlyControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
 // importing the threejs library from the node_modules folder
 // importing the OrbitControls that allows the camera to move around the scene using the mouse
 // importing the FBXLoader which is used to load the FBX model file
-
+const clock = new THREE.Clock();
 const scale = document.getElementById("scale");
 const rotate = document.getElementById("rotate");
 const translate = document.getElementById("translate");
 const delete_object = document.getElementById("delete");
 const log = document.getElementById("log");
-let camera, scene, renderer, controls, selected, transform; //basic variables
+const control = document.getElementById("control");
+let camera, scene, renderer, orbit, fly, fp, selected, transform, curr_control; //basic variables
 let objects = [];
 // variables to keep track of the movement of the camera
 let moveForward = false;
@@ -46,13 +48,11 @@ function init() {
   scene.background = new THREE.Color(0x6d9ec8);
 
   // setting the lights
-
   // https://threejs.org/docs/?q=hemis#api/en/lights/HemisphereLight
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
   hemiLight.name = "hemiLight";
   scene.add(hemiLight);
-
   // https://threejs.org/docs/?q=dire#api/en/lights/DirectionalLight
   const dirLight = new THREE.DirectionalLight(0xffffff);
   dirLight.intensity = 0.8;
@@ -154,13 +154,21 @@ function init() {
   container.appendChild(renderer.domElement);
 
   // initializing the controls
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(0, 0, 0);
-  // damping the camera movement
+  orbit = new OrbitControls(camera, renderer.domElement);
+  orbit.target.set(0, 0, 0);
+  orbit.enabled = false;
+
+  fly = new FlyControls(camera, renderer.domElement);
+  fly.movementSpeed = 50;
+  fly.domElement = renderer.domElement;
+  fly.rollSpeed = Math.PI / 20;
+  fly.autoForward = false;
+  fly.dragToLook = false;
+  curr_control = "fly";
 
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
-    controls.enabled = !event.value;
+    orbit.enabled = !event.value;
   });
   transform.name = "transform";
   scene.add(transform);
@@ -208,7 +216,19 @@ log.addEventListener("click", function () {
   }
   console.log(temp);
 });
-
+control.addEventListener("click", function () {
+  if (curr_control == "fly") {
+    curr_control = "orbit";
+    control.innerHTML = "Orbit";
+    orbit.enabled = true;
+    fly.enabled = false;
+  } else {
+    curr_control = "fly";
+    control.innerHTML = "Fly";
+    orbit.enabled = false;
+    fly.enabled = true;
+  }
+});
 // function to resize the scene
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -340,9 +360,15 @@ function animate() {
       camera.translateY(-1);
     }
   }
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.1;
-  controls.update();
+
+  if (curr_control == "orbit") {
+    orbit.enableDamping = true;
+    orbit.dampingFactor = 0.1;
+    orbit.update();
+  } else {
+    fly.update(0.01);
+  }
+
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
