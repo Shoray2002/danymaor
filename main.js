@@ -37,7 +37,7 @@ function init() {
     45,
     window.innerWidth / window.innerHeight,
     1,
-    1000
+    100000
   );
   camera.position.set(-80, 100, 200);
 
@@ -55,18 +55,18 @@ function init() {
 
   // https://threejs.org/docs/?q=dire#api/en/lights/DirectionalLight
   const dirLight = new THREE.DirectionalLight(0xffffff);
+  dirLight.intensity = 0.8;
   dirLight.position.set(0, 200, 100);
   dirLight.castShadow = true;
-  dirLight.shadow.camera.top = 180;
-  dirLight.shadow.camera.bottom = -100;
-  dirLight.shadow.camera.left = -120;
-  dirLight.shadow.camera.right = 120;
+  dirLight.shadow.camera.top = 1000;
+  dirLight.shadow.camera.bottom = -1000;
+  dirLight.shadow.camera.left = -1000;
+  dirLight.shadow.camera.right = 1000;
   dirLight.name = "dirLight";
   scene.add(dirLight);
-
   // initializing the ground
   const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(4000, 4000),
+    new THREE.PlaneGeometry(1000, 1000),
     new THREE.MeshPhongMaterial({
       color: 0x6d9ec8,
     })
@@ -193,6 +193,7 @@ delete_object.addEventListener("click", function () {
       }
     });
     transform.detach(selected);
+    selected = null;
   }
 });
 
