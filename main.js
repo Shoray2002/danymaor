@@ -69,6 +69,7 @@ function init() {
     new THREE.PlaneGeometry(1000, 1000),
     new THREE.MeshPhongMaterial({
       color: 0x6d9ec8,
+      side: THREE.DoubleSide,
     })
   );
 
@@ -91,6 +92,7 @@ function init() {
         child.castShadow = true; // cast shadow
         child.receiveShadow = true; // receive shadow
         child.material.map = texture; // setting the texture onto the model
+        child.material.color.set(0xffffff);
         child.material.needsUpdate = true; // updating the material
         // make the texture visible from both sides of the model surface
         // child.material.side = THREE.DoubleSide;
@@ -109,6 +111,7 @@ function init() {
         objects.push(child);
         child.castShadow = true; // cast shadow
         child.receiveShadow = true; // receive shadow
+        child.material.color.set(0xffffff);
         child.material.map = texture; // setting the texture onto the model
         child.material.needsUpdate = true; // updating the material
         // make the texture visible from both sides of the model surface
@@ -128,6 +131,7 @@ function init() {
         objects.push(child);
         child.castShadow = true; // cast shadow
         child.receiveShadow = true; // receive shadow
+        child.material.color.set(0xffffff);
         child.material.map = texture; // setting the texture onto the model
         child.material.needsUpdate = true; // updating the material
         // make the texture visible from both sides of the model surface
@@ -152,7 +156,7 @@ function init() {
   // initializing the controls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
-  controls.update();
+  // damping the camera movement
 
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
@@ -336,6 +340,9 @@ function animate() {
       camera.translateY(-1);
     }
   }
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.1;
+  controls.update();
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
