@@ -1,19 +1,18 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
-import { FlyControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/FlyControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
 // importing the threejs library from the node_modules folder
 // importing the OrbitControls that allows the camera to move around the scene using the mouse
 // importing the FBXLoader which is used to load the FBX model file
-const clock = new THREE.Clock();
+
 const scale = document.getElementById("scale");
 const rotate = document.getElementById("rotate");
 const translate = document.getElementById("translate");
 const delete_object = document.getElementById("delete");
 const log = document.getElementById("log");
-const control = document.getElementById("control");
-let camera, scene, renderer, orbit, fly, fp, selected, transform, curr_control; //basic variables
+const snap = document.getElementById("snap");
+let camera, scene, renderer, controls, selected, transform; //basic variables
 let objects = [];
 // variables to keep track of the movement of the camera
 let moveForward = false;
@@ -22,15 +21,8 @@ let moveLeft = false;
 let moveRight = false;
 let moveUp = false;
 let moveDown = false;
-let player = {
-  height: 10.5,
-  turnSpeed: 1,
-  speed: 2.5,
-  jumpHeight: 3,
-  gravity: 0.1,
-  velocity: 0,
-  playerJumps: false,
-};
+let snap_val = 0.1;
+
 // function calls
 init();
 animate();
@@ -40,6 +32,9 @@ function init() {
   // creating a new div in the html file to display the scene
   const container = document.createElement("div");
   document.body.appendChild(container);
+
+  // initializing the camera
+  // https://threejs.org/docs/?q=camera#api/en/cameras/PerspectiveCamera
   camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
@@ -51,11 +46,16 @@ function init() {
   // initializing the scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x6d9ec8);
+
+  // setting the lights
+
+  // https://threejs.org/docs/?q=hemis#api/en/lights/HemisphereLight
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
   hemiLight.name = "hemiLight";
   scene.add(hemiLight);
 
+  // https://threejs.org/docs/?q=dire#api/en/lights/DirectionalLight
   const dirLight = new THREE.DirectionalLight(0xffffff);
   dirLight.intensity = 0.8;
   dirLight.position.set(0, 200, 100);
@@ -71,7 +71,6 @@ function init() {
     new THREE.PlaneGeometry(1000, 1000),
     new THREE.MeshPhongMaterial({
       color: 0x6d9ec8,
-      side: THREE.DoubleSide,
     })
   );
 
@@ -94,7 +93,6 @@ function init() {
         child.castShadow = true; // cast shadow
         child.receiveShadow = true; // receive shadow
         child.material.map = texture; // setting the texture onto the model
-        child.material.color.set(0xffffff);
         child.material.needsUpdate = true; // updating the material
         // make the texture visible from both sides of the model surface
         // child.material.side = THREE.DoubleSide;
@@ -113,7 +111,6 @@ function init() {
         objects.push(child);
         child.castShadow = true; // cast shadow
         child.receiveShadow = true; // receive shadow
-        child.material.color.set(0xffffff);
         child.material.map = texture; // setting the texture onto the model
         child.material.needsUpdate = true; // updating the material
         // make the texture visible from both sides of the model surface
@@ -133,7 +130,6 @@ function init() {
         objects.push(child);
         child.castShadow = true; // cast shadow
         child.receiveShadow = true; // receive shadow
-        child.material.color.set(0xffffff);
         child.material.map = texture; // setting the texture onto the model
         child.material.needsUpdate = true; // updating the material
         // make the texture visible from both sides of the model surface
@@ -156,21 +152,14 @@ function init() {
   container.appendChild(renderer.domElement);
 
   // initializing the controls
-  orbit = new OrbitControls(camera, renderer.domElement);
-  orbit.enabled = false;
-
-  fly = new FlyControls(camera, renderer.domElement);
-  fly.movementSpeed = 100;
-  fly.domElement = renderer.domElement;
-  fly.rollSpeed = Math.PI / 20;
-  fly.autoForward = false;
-  fly.dragToLook = false;
-  curr_control = "fly";
-  fly.name = "fly";
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 0, 0);
+  controls.update();
 
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
-    orbit.enabled = !event.value;
+    controls.enabled = !event.value;
+    console.log(event.value);
   });
   transform.name = "transform";
   scene.add(transform);
@@ -210,6 +199,18 @@ delete_object.addEventListener("click", function () {
     selected = null;
   }
 });
+snap.addEventListener("change", function () {
+  snap_val = parseFloat(snap.value);
+  if (!snap_val) {
+    snap_val = 0.1;
+  }
+
+  transform.setTranslationSnap(snap_val);
+  transform.setRotationSnap((snap_val * Math.PI) / 1.8);
+  transform.setScaleSnap(snap_val);
+  transform.update();
+});
+
 log.addEventListener("click", function () {
   let temp = [];
   for (var i = 0; i < scene.children.length; i++) {
@@ -217,27 +218,7 @@ log.addEventListener("click", function () {
   }
   console.log(temp);
 });
-control.addEventListener("click", function () {
-  if (curr_control == "fly") {
-    curr_control = "orbit";
-    control.innerHTML = "Fly";
-    orbit.enabled = true;
-    camera.position.set(camera.position.x, player.height, camera.position.z);
-    camera.lookAt(
-      new THREE.Vector3(
-        camera.position.x,
-        player.height,
-        camera.position.z + 10
-      )
-    );
-    fly.enabled = false;
-  } else {
-    curr_control = "fly";
-    control.innerHTML = "Orbit";
-    orbit.enabled = false;
-    fly.enabled = true;
-  }
-});
+
 // function to resize the scene
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -256,14 +237,15 @@ function onDocumentMouseDown(event) {
     console.log(intersects[0].object.parent.name);
     selected = intersects[0].object;
     selected.material.color.set(0x8fd3fe);
-    transform.attach(selected);
     objects.forEach((object) => {
       if (object !== selected && object.name !== "ground") {
         object.material.color.set(0xffffff);
+        transform.attach(selected);
       }
     });
   }
 }
+
 function onDocumentKeyDown(event) {
   switch (event.keyCode) {
     case 38: // up
@@ -295,14 +277,9 @@ function onDocumentKeyDown(event) {
       transform.detach(selected);
       selected.material.color.set(0xffffff);
       selected = null;
-      break;
-    // space
-    case 32:
-      if (player.jumps) return false;
-      player.jumps = true;
-      player.velocity = -player.jumpHeight;
   }
 }
+
 function onDocumentKeyUp(event) {
   switch (event.keyCode) {
     case 38: // up
@@ -332,14 +309,6 @@ function onDocumentKeyUp(event) {
   }
 }
 
-function jump() {
-  player.velocity += player.gravity;
-  camera.position.y -= player.velocity;
-  if (camera.position.y < player.height) {
-    camera.position.y = player.height;
-    player.jumps = false;
-  }
-}
 // function to animate the scene
 function animate() {
   if (selected) {
@@ -363,24 +332,16 @@ function animate() {
     }
   } else {
     if (moveForward) {
-      camera.position.x += Math.sin(camera.rotation.y) * player.speed;
-      camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
+      camera.translateZ(-1);
     }
     if (moveBackward) {
-      camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
-      camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
+      camera.translateZ(1);
     }
     if (moveLeft) {
-      camera.position.x -=
-        Math.sin(camera.rotation.y + Math.PI / 2) * player.speed;
-      camera.position.z -=
-        -Math.cos(camera.rotation.y + Math.PI / 2) * player.speed;
+      camera.translateX(-1);
     }
     if (moveRight) {
-      camera.position.x -=
-        Math.sin(camera.rotation.y - Math.PI / 2) * player.speed;
-      camera.position.z -=
-        -Math.cos(camera.rotation.y - Math.PI / 2) * player.speed;
+      camera.translateX(1);
     }
     if (moveUp) {
       camera.translateY(1);
@@ -389,16 +350,6 @@ function animate() {
       camera.translateY(-1);
     }
   }
-
-  if (curr_control == "orbit") {
-    orbit.enableDamping = true;
-    orbit.dampingFactor = 0.1;
-    orbit.update();
-    jump();
-  } else {
-    fly.update(0.01);
-  }
-
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }

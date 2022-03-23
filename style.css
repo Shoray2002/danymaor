@@ -17,8 +17,7 @@ body {
 }
 
 .button {
-  background-color: #00000062;
-  border-radius: 10px;
+  background-color: #4caf50;
   border: none;
   color: white;
   padding: 15px 32px;
@@ -28,9 +27,11 @@ body {
   font-size: 20px;
   margin: 4px 2px;
   cursor: pointer;
-  transition: cubic-bezier(0.2, 0.8, 0.2, 1) 1s;
 }
 
-.button:hover {
-  background-color: #000000;
+#snap {
+  resize: none;
+  overflow: hidden;
+  outline: none;
+  color: #fff;
 }
