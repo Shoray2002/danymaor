@@ -65,6 +65,8 @@ function init() {
   dirLight.shadow.camera.left = -1000;
   dirLight.shadow.camera.right = 1000;
   dirLight.name = "dirLight";
+  dirLight.shadow.mapSize.width = 1024 * 2;
+  dirLight.shadow.mapSize.height = 1024 * 2;
   scene.add(dirLight);
   // initializing the ground
   const mesh = new THREE.Mesh(
@@ -94,8 +96,7 @@ function init() {
         child.receiveShadow = true; // receive shadow
         child.material.map = texture; // setting the texture onto the model
         child.material.needsUpdate = true; // updating the material
-        // make the texture visible from both sides of the model surface
-        // child.material.side = THREE.DoubleSide;
+        if (child.material.map) child.material.map.anisotropy = 16;
       }
     });
     // increasing the size of the model
@@ -154,7 +155,6 @@ function init() {
   // initializing the controls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
-
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
     controls.enabled = !event.value;
@@ -209,7 +209,6 @@ snap.addEventListener("change", function () {
   transform.setScaleSnap(snap_val);
   transform.update();
 });
-
 log.addEventListener("click", function () {
   let temp = [];
   for (var i = 0; i < scene.children.length; i++) {
