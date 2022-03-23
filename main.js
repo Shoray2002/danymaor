@@ -204,7 +204,7 @@ snap.addEventListener("change", function () {
   if (!snap_val) {
     snap_val = 0.1;
   }
-
+  console.log(snap_val);
   transform.setTranslationSnap(snap_val);
   transform.setRotationSnap((snap_val * Math.PI) / 1.8);
   transform.setScaleSnap(snap_val);
@@ -235,7 +235,9 @@ function onDocumentMouseDown(event) {
   const intersects = raycaster.intersectObjects(objects);
   if (intersects.length > 1) {
     console.log(intersects[0].object.parent.name);
-    selected = intersects[0].object;
+    if (intersects[0].object.parent.name) {
+      selected = intersects[0].object;
+    }
     selected.material.color.set(0x8fd3fe);
     objects.forEach((object) => {
       if (object !== selected && object.name !== "ground") {

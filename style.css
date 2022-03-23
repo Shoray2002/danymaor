@@ -30,8 +30,7 @@ body {
 }
 
 #snap {
-  resize: none;
-  overflow: hidden;
+  width: 50px;
   outline: none;
   color: #fff;
 }
