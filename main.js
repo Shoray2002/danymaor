@@ -32,9 +32,6 @@ function init() {
   // creating a new div in the html file to display the scene
   const container = document.createElement("div");
   document.body.appendChild(container);
-
-  // initializing the camera
-  // https://threejs.org/docs/?q=camera#api/en/cameras/PerspectiveCamera
   camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
@@ -46,14 +43,11 @@ function init() {
   // initializing the scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x6d9ec8);
-
-  // setting the lights
-  // https://threejs.org/docs/?q=hemis#api/en/lights/HemisphereLight
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
   hemiLight.name = "hemiLight";
   scene.add(hemiLight);
-  // https://threejs.org/docs/?q=dire#api/en/lights/DirectionalLight
+
   const dirLight = new THREE.DirectionalLight(0xffffff);
   dirLight.intensity = 0.8;
   dirLight.position.set(0, 200, 100);
@@ -155,11 +149,10 @@ function init() {
 
   // initializing the controls
   orbit = new OrbitControls(camera, renderer.domElement);
-  orbit.target.set(0, 0, 0);
   orbit.enabled = false;
 
   fly = new FlyControls(camera, renderer.domElement);
-  fly.movementSpeed = 50;
+  fly.movementSpeed = 100;
   fly.domElement = renderer.domElement;
   fly.rollSpeed = Math.PI / 20;
   fly.autoForward = false;
@@ -208,7 +201,6 @@ delete_object.addEventListener("click", function () {
     selected = null;
   }
 });
-
 log.addEventListener("click", function () {
   let temp = [];
   for (var i = 0; i < scene.children.length; i++) {
@@ -255,7 +247,6 @@ function onDocumentMouseDown(event) {
     });
   }
 }
-
 function onDocumentKeyDown(event) {
   switch (event.keyCode) {
     case 38: // up
@@ -289,7 +280,6 @@ function onDocumentKeyDown(event) {
       selected = null;
   }
 }
-
 function onDocumentKeyUp(event) {
   switch (event.keyCode) {
     case 38: // up
