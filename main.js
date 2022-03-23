@@ -240,6 +240,7 @@ function onDocumentMouseDown(event) {
     objects.forEach((object) => {
       if (object !== selected && object.name !== "ground") {
         object.material.color.set(0xffffff);
+      } else {
         transform.attach(selected);
       }
     });
