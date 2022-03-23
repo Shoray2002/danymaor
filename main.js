@@ -154,7 +154,6 @@ function init() {
   // initializing the controls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
-  controls.update();
 
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
