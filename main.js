@@ -22,7 +22,15 @@ let moveLeft = false;
 let moveRight = false;
 let moveUp = false;
 let moveDown = false;
-
+let player = {
+  height: 10.5,
+  turnSpeed: 1,
+  speed: 2.5,
+  jumpHeight: 3,
+  gravity: 0.1,
+  velocity: 0,
+  playerJumps: false,
+};
 // function calls
 init();
 animate();
@@ -158,6 +166,7 @@ function init() {
   fly.autoForward = false;
   fly.dragToLook = false;
   curr_control = "fly";
+  fly.name = "fly";
 
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
@@ -211,12 +220,20 @@ log.addEventListener("click", function () {
 control.addEventListener("click", function () {
   if (curr_control == "fly") {
     curr_control = "orbit";
-    control.innerHTML = "Orbit";
+    control.innerHTML = "Fly";
     orbit.enabled = true;
+    camera.position.set(camera.position.x, player.height, camera.position.z);
+    camera.lookAt(
+      new THREE.Vector3(
+        camera.position.x,
+        player.height,
+        camera.position.z + 10
+      )
+    );
     fly.enabled = false;
   } else {
     curr_control = "fly";
-    control.innerHTML = "Fly";
+    control.innerHTML = "Orbit";
     orbit.enabled = false;
     fly.enabled = true;
   }
@@ -278,6 +295,12 @@ function onDocumentKeyDown(event) {
       transform.detach(selected);
       selected.material.color.set(0xffffff);
       selected = null;
+      break;
+    // space
+    case 32:
+      if (player.jumps) return false;
+      player.jumps = true;
+      player.velocity = -player.jumpHeight;
   }
 }
 function onDocumentKeyUp(event) {
@@ -309,6 +332,14 @@ function onDocumentKeyUp(event) {
   }
 }
 
+function jump() {
+  player.velocity += player.gravity;
+  camera.position.y -= player.velocity;
+  if (camera.position.y < player.height) {
+    camera.position.y = player.height;
+    player.jumps = false;
+  }
+}
 // function to animate the scene
 function animate() {
   if (selected) {
@@ -332,16 +363,24 @@ function animate() {
     }
   } else {
     if (moveForward) {
-      camera.translateZ(-1);
+      camera.position.x += Math.sin(camera.rotation.y) * player.speed;
+      camera.position.z += -Math.cos(camera.rotation.y) * player.speed;
     }
     if (moveBackward) {
-      camera.translateZ(1);
+      camera.position.x -= Math.sin(camera.rotation.y) * player.speed;
+      camera.position.z -= -Math.cos(camera.rotation.y) * player.speed;
     }
     if (moveLeft) {
-      camera.translateX(-1);
+      camera.position.x -=
+        Math.sin(camera.rotation.y + Math.PI / 2) * player.speed;
+      camera.position.z -=
+        -Math.cos(camera.rotation.y + Math.PI / 2) * player.speed;
     }
     if (moveRight) {
-      camera.translateX(1);
+      camera.position.x -=
+        Math.sin(camera.rotation.y - Math.PI / 2) * player.speed;
+      camera.position.z -=
+        -Math.cos(camera.rotation.y - Math.PI / 2) * player.speed;
     }
     if (moveUp) {
       camera.translateY(1);
@@ -355,6 +394,7 @@ function animate() {
     orbit.enableDamping = true;
     orbit.dampingFactor = 0.1;
     orbit.update();
+    jump();
   } else {
     fly.update(0.01);
   }
