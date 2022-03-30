@@ -2,9 +2,6 @@ import * as THREE from "three";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
-// importing the threejs library from the node_modules folder
-// importing the OrbitControls that allows the camera to move around the scene using the mouse
-// importing the FBXLoader which is used to load the FBX model file
 
 const scale = document.getElementById("scale");
 const rotate = document.getElementById("rotate");
@@ -12,9 +9,11 @@ const translate = document.getElementById("translate");
 const delete_object = document.getElementById("delete");
 const log = document.getElementById("log");
 const snap = document.getElementById("snap");
-let camera, scene, renderer, controls, selected, transform; //basic variables
+const drop = document.getElementById("drop");
+
+let camera, scene, renderer, controls, selected, transform;
 let objects = [];
-// variables to keep track of the movement of the camera
+let pointer = new THREE.Vector2();
 let moveForward = false;
 let moveBackward = false;
 let moveLeft = false;
@@ -22,19 +21,14 @@ let moveRight = false;
 let moveUp = false;
 let moveDown = false;
 let snap_val = 0.1;
-
-// function calls
+const model = new FBXLoader();
+const textureLoader = new THREE.TextureLoader();
 init();
 animate();
 
-// function to initialize the scene
 function init() {
-  // creating a new div in the html file to display the scene
   const container = document.createElement("div");
   document.body.appendChild(container);
-
-  // initializing the camera
-  // https://threejs.org/docs/?q=camera#api/en/cameras/PerspectiveCamera
   camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
@@ -47,15 +41,11 @@ function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x6d9ec8);
 
-  // setting the lights
-
-  // https://threejs.org/docs/?q=hemis#api/en/lights/HemisphereLight
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
   hemiLight.name = "hemiLight";
   scene.add(hemiLight);
 
-  // https://threejs.org/docs/?q=dire#api/en/lights/DirectionalLight
   const dirLight = new THREE.DirectionalLight(0xffffff);
   dirLight.intensity = 0.8;
   dirLight.position.set(0, 200, 100);
@@ -68,7 +58,7 @@ function init() {
   dirLight.shadow.mapSize.width = 1024 * 2;
   dirLight.shadow.mapSize.height = 1024 * 2;
   scene.add(dirLight);
-  // initializing the ground
+
   const mesh = new THREE.Mesh(
     new THREE.PlaneGeometry(1000, 1000),
     new THREE.MeshPhongMaterial({
@@ -82,67 +72,61 @@ function init() {
   objects.push(mesh);
   scene.add(mesh);
 
-  // loading the FBX model and texture
-  const textureLoader = new THREE.TextureLoader();
-  const texture = textureLoader.load("./assets/apartment.png");
-
-  const model = new FBXLoader();
-  model.load("./assets/apartment.fbx", function (object) {
-    // modifying the FBX model
-    object.traverse(function (child) {
-      if (child.isMesh) {
-        objects.push(child);
-        child.castShadow = true; // cast shadow
-        child.receiveShadow = true; // receive shadow
-        child.material.map = texture; // setting the texture onto the model
-        child.material.needsUpdate = true; // updating the material
-        if (child.material.map) child.material.map.anisotropy = 16;
-      }
-    });
-    // increasing the size of the model
-    object.name = "apartment";
-    object.scale.set(20, 20, 20);
-    object.position.set(-100, 0, 0);
-    scene.add(object);
-  });
-  model.load("./assets/apartment.fbx", function (object) {
-    // modifying the FBX model
-    object.traverse(function (child) {
-      if (child.isMesh) {
-        objects.push(child);
-        child.castShadow = true; // cast shadow
-        child.receiveShadow = true; // receive shadow
-        child.material.map = texture; // setting the texture onto the model
-        child.material.needsUpdate = true; // updating the material
-        // make the texture visible from both sides of the model surface
-        // child.material.side = THREE.DoubleSide;
-      }
-    });
-    // increasing the size of the model
-    object.name = "apartment2";
-    object.scale.set(20, 20, 20);
-    object.position.set(100, 0, 0);
-    scene.add(object);
-  });
-  model.load("./assets/apartment.fbx", function (object) {
-    // modifying the FBX model
-    object.traverse(function (child) {
-      if (child.isMesh) {
-        objects.push(child);
-        child.castShadow = true; // cast shadow
-        child.receiveShadow = true; // receive shadow
-        child.material.map = texture; // setting the texture onto the model
-        child.material.needsUpdate = true; // updating the material
-        // make the texture visible from both sides of the model surface
-        // child.material.side = THREE.DoubleSide;
-      }
-    });
-    // increasing the size of the model
-    object.name = "apartment3";
-    object.scale.set(20, 20, 20);
-    object.position.set(100, 0, 200);
-    scene.add(object);
-  });
+  {
+    // model.load("./assets/apartment.fbx", function (object) {
+    //   object.traverse(function (child) {
+    //     if (child.isMesh) {
+    //       objects.push(child);
+    //       child.castShadow = true;
+    //       child.receiveShadow = true;
+    //       child.material.map = texture;
+    //       child.material.needsUpdate = true;
+    //       if (child.material.map) child.material.map.anisotropy = 16;
+    //     }
+    //   });
+    //   object.name = "apartment";
+    //   object.scale.set(20, 20, 20);
+    //   object.position.set(-100, 0, 0);
+    //   scene.add(object);
+    // });
+    // model.load("./assets/apartment.fbx", function (object) {
+    //     object.traverse(function (child) {
+    //       if (child.isMesh) {
+    //         objects.push(child);
+    //         child.castShadow = true; // cast shadow
+    //         child.receiveShadow = true; // receive shadow
+    //         child.material.map = texture; // setting the texture onto the model
+    //         child.material.needsUpdate = true; // updating the material
+    //         // make the texture visible from both sides of the model surface
+    //         // child.material.side = THREE.DoubleSide;
+    //       }
+    //     });
+    //     // increasing the size of the model
+    //     object.name = "apartment2";
+    //     object.scale.set(20, 20, 20);
+    //     object.position.set(100, 0, 0);
+    //     scene.add(object);
+    //   });
+    //   model.load("./assets/apartment.fbx", function (object) {
+    //     // modifying the FBX model
+    //     object.traverse(function (child) {
+    //       if (child.isMesh) {
+    //         objects.push(child);
+    //         child.castShadow = true; // cast shadow
+    //         child.receiveShadow = true; // receive shadow
+    //         child.material.map = texture; // setting the texture onto the model
+    //         child.material.needsUpdate = true; // updating the material
+    //         // make the texture visible from both sides of the model surface
+    //         // child.material.side = THREE.DoubleSide;
+    //       }
+    //     });
+    //     // increasing the size of the model
+    //     object.name = "apartment3";
+    //     object.scale.set(20, 20, 20);
+    //     object.position.set(100, 0, 200);
+    //     scene.add(object);
+    //   });
+  }
 
   // initializing the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -167,6 +151,7 @@ function init() {
   document.addEventListener("click", onDocumentMouseDown);
   document.addEventListener("keydown", onDocumentKeyDown);
   document.addEventListener("keyup", onDocumentKeyUp);
+  document.addEventListener("mousemove", onDocumentMouseMove);
 }
 
 scale.addEventListener("click", function () {
@@ -216,6 +201,26 @@ log.addEventListener("click", function () {
   }
   console.log(temp);
 });
+drop.addEventListener("click", function () {
+  // add a new model
+  model.load("./assets/apartment.fbx", function (object) {
+    const texture = textureLoader.load("./assets/apartment.png");
+    object.traverse(function (child) {
+      if (child.isMesh) {
+        objects.push(child);
+        child.castShadow = true;
+        child.receiveShadow = true;
+        child.material.map = texture;
+        child.material.needsUpdate = true;
+      }
+    });
+    object.name = "apartment";
+    object.scale.set(20, 20, 20);
+    object.position.set(0, 0, 0);
+    scene.add(object);
+  });
+  console.log("Added");
+});
 
 // function to resize the scene
 function onWindowResize() {
@@ -224,12 +229,16 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+function onDocumentMouseMove(event) {
+  event.preventDefault();
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  console.log(pointer);
+}
+
 function onDocumentMouseDown(event) {
   const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  raycaster.setFromCamera(mouse, camera);
+  raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObjects(objects);
   if (intersects.length > 1) {
     console.log(intersects[0].object.parent.name);
