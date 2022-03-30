@@ -14,10 +14,15 @@ const choices = document.getElementById("choices");
 let camera, scene, renderer, controls, selected, transform;
 let objects = [];
 let models = {
-  apartment: ["./assets/apartment.fbx", "apartment", 1],
-  officeOctagon: ["./assets/OfficeOctagon_Base.fbx", "officeOctagon", 1],
-  officeLarge: ["./assets/OfficeOld_Large.fbx", "officeLarge", 1],
-  shop: ["./assets/SM_Bld_Shop_01.fbx", "shop", 1],
+  apartment: ["./assets/apartment.fbx", "apartment", 1, [20, 20, 20]],
+  officeOctagon: [
+    "./assets/OfficeOctagon_Base.fbx",
+    "officeOctagon",
+    1,
+    [8, 8, 8],
+  ],
+  officeLarge: ["./assets/OfficeOld_Large.fbx", "officeLarge", 1, [8, 8, 8]],
+  shop: ["./assets/SM_Bld_Shop_01.fbx", "shop", 1, [18, 18, 18]],
 };
 let pointer = new THREE.Vector2();
 let moveForward = false;
@@ -156,7 +161,6 @@ log.addEventListener("click", function () {
 drop.addEventListener("click", function () {
   // find the current choice in models
   let choice = models[curr_choice];
-
   model.load(choice[0], function (object) {
     object.traverse(function (child) {
       if (child.isMesh) {
@@ -169,7 +173,7 @@ drop.addEventListener("click", function () {
     });
     object.name = choice[1] + "_" + choice[2];
     choice[2]++;
-    object.scale.set(20, 20, 20);
+    object.scale.set(choice[3][0], choice[3][1], choice[3][2]);
     object.position.set(Math.random() * 100 - 50, 0, Math.random() * 100 - 50);
     scene.add(object);
     console.log("Added:" + object.name);
