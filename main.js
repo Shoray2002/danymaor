@@ -10,9 +10,15 @@ const delete_object = document.getElementById("delete");
 const log = document.getElementById("log");
 const snap = document.getElementById("snap");
 const drop = document.getElementById("drop");
-
+const choices = document.getElementById("choices");
 let camera, scene, renderer, controls, selected, transform;
 let objects = [];
+let models = {
+  apartment: ["./assets/apartment.fbx", "apartment", 1],
+  officeOctagon: ["./assets/OfficeOctagon_Base.fbx", "officeOctagon", 1],
+  officeLarge: ["./assets/OfficeOld_Large.fbx", "officeLarge", 1],
+  shop: ["./assets/SM_Bld_Shop_01.fbx", "shop", 1],
+};
 let pointer = new THREE.Vector2();
 let moveForward = false;
 let moveBackward = false;
@@ -21,8 +27,10 @@ let moveRight = false;
 let moveUp = false;
 let moveDown = false;
 let snap_val = 0.1;
+let curr_choice = "apartment";
 const model = new FBXLoader();
-const textureLoader = new THREE.TextureLoader();
+const texture = new THREE.TextureLoader().load("./assets/apartment.png");
+
 init();
 animate();
 
@@ -71,62 +79,6 @@ function init() {
   mesh.name = "ground";
   objects.push(mesh);
   scene.add(mesh);
-
-  {
-    // model.load("./assets/apartment.fbx", function (object) {
-    //   object.traverse(function (child) {
-    //     if (child.isMesh) {
-    //       objects.push(child);
-    //       child.castShadow = true;
-    //       child.receiveShadow = true;
-    //       child.material.map = texture;
-    //       child.material.needsUpdate = true;
-    //       if (child.material.map) child.material.map.anisotropy = 16;
-    //     }
-    //   });
-    //   object.name = "apartment";
-    //   object.scale.set(20, 20, 20);
-    //   object.position.set(-100, 0, 0);
-    //   scene.add(object);
-    // });
-    // model.load("./assets/apartment.fbx", function (object) {
-    //     object.traverse(function (child) {
-    //       if (child.isMesh) {
-    //         objects.push(child);
-    //         child.castShadow = true; // cast shadow
-    //         child.receiveShadow = true; // receive shadow
-    //         child.material.map = texture; // setting the texture onto the model
-    //         child.material.needsUpdate = true; // updating the material
-    //         // make the texture visible from both sides of the model surface
-    //         // child.material.side = THREE.DoubleSide;
-    //       }
-    //     });
-    //     // increasing the size of the model
-    //     object.name = "apartment2";
-    //     object.scale.set(20, 20, 20);
-    //     object.position.set(100, 0, 0);
-    //     scene.add(object);
-    //   });
-    //   model.load("./assets/apartment.fbx", function (object) {
-    //     // modifying the FBX model
-    //     object.traverse(function (child) {
-    //       if (child.isMesh) {
-    //         objects.push(child);
-    //         child.castShadow = true; // cast shadow
-    //         child.receiveShadow = true; // receive shadow
-    //         child.material.map = texture; // setting the texture onto the model
-    //         child.material.needsUpdate = true; // updating the material
-    //         // make the texture visible from both sides of the model surface
-    //         // child.material.side = THREE.DoubleSide;
-    //       }
-    //     });
-    //     // increasing the size of the model
-    //     object.name = "apartment3";
-    //     object.scale.set(20, 20, 20);
-    //     object.position.set(100, 0, 200);
-    //     scene.add(object);
-    //   });
-  }
 
   // initializing the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -202,9 +154,10 @@ log.addEventListener("click", function () {
   console.log(temp);
 });
 drop.addEventListener("click", function () {
-  // add a new model
-  model.load("./assets/apartment.fbx", function (object) {
-    const texture = textureLoader.load("./assets/apartment.png");
+  // find the current choice in models
+  let choice = models[curr_choice];
+
+  model.load(choice[0], function (object) {
     object.traverse(function (child) {
       if (child.isMesh) {
         objects.push(child);
@@ -214,15 +167,19 @@ drop.addEventListener("click", function () {
         child.material.needsUpdate = true;
       }
     });
-    object.name = "apartment";
+    object.name = choice[1] + "_" + choice[2];
+    choice[2]++;
     object.scale.set(20, 20, 20);
-    object.position.set(0, 0, 0);
+    object.position.set(Math.random() * 100 - 50, 0, Math.random() * 100 - 50);
     scene.add(object);
+    console.log("Added:" + object.name);
   });
-  console.log("Added");
+});
+choices.addEventListener("change", function () {
+  curr_choice = choices.value;
+  console.log(curr_choice);
 });
 
-// function to resize the scene
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -233,7 +190,6 @@ function onDocumentMouseMove(event) {
   event.preventDefault();
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  console.log(pointer);
 }
 
 function onDocumentMouseDown(event) {
