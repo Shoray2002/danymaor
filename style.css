@@ -21,7 +21,7 @@ body {
   background-color: #00000062;
   border: none;
   color: white;
-  padding: 15px 32px;
+  padding: 7px 16px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -40,5 +40,25 @@ body {
 
 .button:hover {
   background-color: #000000;
+  border-radius: 5px;
+}
+
+.previews {
+  padding-top: 2vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 50%;
+  height: 10%;
+}
+img {
+  width: 20%;
+  height: 10%;
+  aspect-ratio: 1.2;
+  border: #000000 dashed 2px;
+  transition: cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s;
+}
+img:hover {
+  border: #000000 solid 2px;
   border-radius: 5px;
 }
