@@ -11,7 +11,14 @@ const log = document.getElementById("log");
 const snap = document.getElementById("snap");
 const drop = document.getElementById("drop");
 const choices = document.getElementById("choices");
-let camera, scene, renderer, controls, selected, transform, dropSelected;
+let camera,
+  scene,
+  renderer,
+  controls,
+  selected,
+  transform,
+  dropSelected,
+  ground;
 let objects = [];
 let models = {
   apartment: ["./assets/apartment.fbx", "apartment", 1, [20, 20, 20]],
@@ -72,18 +79,18 @@ function init() {
   dirLight.shadow.mapSize.height = 1024 * 2;
   scene.add(dirLight);
 
-  const mesh = new THREE.Mesh(
+  ground = new THREE.Mesh(
     new THREE.PlaneGeometry(1000, 1000),
     new THREE.MeshPhongMaterial({
       color: 0x6d9ec8,
     })
   );
 
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.receiveShadow = true;
-  mesh.name = "ground";
-  objects.push(mesh);
-  scene.add(mesh);
+  ground.rotation.x = -Math.PI / 2;
+  ground.receiveShadow = true;
+  ground.name = "ground";
+  objects.push(ground);
+  scene.add(ground);
 
   // initializing the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -102,7 +109,7 @@ function init() {
   });
   transform.name = "transform";
   scene.add(transform);
-  // adding the event listeners
+
   window.addEventListener("resize", onWindowResize);
   document.addEventListener("click", onDocumentMouseDown);
   document.addEventListener("keydown", onDocumentKeyDown);
@@ -214,7 +221,6 @@ function onDocumentMouseDown(event) {
     });
   }
   if (dropSelected) {
-    dropSelected.position.set(pointer.x, 0, pointer.y);
     dropSelected = null;
   }
 }
@@ -325,7 +331,9 @@ function animate() {
   }
 
   if (dropSelected) {
-    dropSelected.position.set(pointer.x, 0, pointer.y);
+    let x = pointer.x * 500 - 20;
+    let y = -1 * (pointer.y * 500 + 20);
+    dropSelected.position.set(x, 0, y);
   }
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
