@@ -41,7 +41,7 @@ let moveDown = false;
 let snap_val = 0.1;
 let curr_choice = "apartment";
 const model = new FBXLoader();
-const texture = new THREE.TextureLoader().load("./assets/apartment.png");
+const texture = new THREE.TextureLoader().load("./assets/texture.png");
 
 init();
 animate();
@@ -178,11 +178,11 @@ drop.addEventListener("click", function () {
     });
     object.name = choice[1] + "_" + choice[2];
     choice[2]++;
+    console.log("Added:" + object.name);
     object.scale.set(choice[3][0], choice[3][1], choice[3][2]);
     object.position.set(pointer.x, 0, pointer.y);
     dropSelected = object;
     scene.add(object);
-    console.log("Added:" + object.name);
   });
 });
 choices.addEventListener("change", function () {
