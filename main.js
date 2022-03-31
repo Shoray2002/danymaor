@@ -9,8 +9,10 @@ const translate = document.getElementById("translate");
 const delete_object = document.getElementById("delete");
 const log = document.getElementById("log");
 const snap = document.getElementById("snap");
-const drop = document.getElementById("drop");
-const choices = document.getElementById("choices");
+const apartment = document.getElementById("apartment");
+const officeOctagon = document.getElementById("officeOctagon");
+const officeLarge = document.getElementById("officeLarge");
+const shop = document.getElementById("shop");
 let camera,
   scene,
   renderer,
@@ -164,7 +166,7 @@ log.addEventListener("click", function () {
   }
   console.log(temp);
 });
-drop.addEventListener("click", function () {
+function addModel() {
   let choice = models[curr_choice];
   model.load(choice[0], function (object) {
     object.traverse(function (child) {
@@ -184,10 +186,22 @@ drop.addEventListener("click", function () {
     dropSelected = object;
     scene.add(object);
   });
+}
+apartment.addEventListener("click", function () {
+  curr_choice = "apartment";
+  addModel();
 });
-choices.addEventListener("change", function () {
-  curr_choice = choices.value;
-  console.log(curr_choice);
+officeOctagon.addEventListener("click", function () {
+  curr_choice = "officeOctagon";
+  addModel();
+});
+officeLarge.addEventListener("click", function () {
+  curr_choice = "officeLarge";
+  addModel();
+});
+shop.addEventListener("click", function () {
+  curr_choice = "shop";
+  addModel();
 });
 
 function onWindowResize() {
