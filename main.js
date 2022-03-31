@@ -61,7 +61,7 @@ function init() {
 
   // initializing the scene
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x6d9ec8);
+  scene.background = new THREE.Color(0x71b1fe);
 
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
@@ -85,6 +85,7 @@ function init() {
     new THREE.PlaneGeometry(1000, 1000),
     new THREE.MeshPhongMaterial({
       color: 0x6d9ec8,
+      side: THREE.DoubleSide,
     })
   );
 
@@ -175,9 +176,12 @@ function addModel() {
         child.castShadow = true;
         child.receiveShadow = true;
         child.material.map = texture;
+        child.material.transparent = true;
+        child.material.opacity = 0.8;
         child.material.needsUpdate = true;
       }
     });
+
     object.name = choice[1] + "_" + choice[2];
     choice[2]++;
     console.log("Added:" + object.name);
@@ -185,6 +189,11 @@ function addModel() {
     object.position.set(pointer.x, 0, pointer.y);
     dropSelected = object;
     scene.add(object);
+    // disable img buttons
+    apartment.disabled = true;
+    shop.disabled = true;
+    officeOctagon.disabled = true;
+    officeLarge.disabled = true;
   });
 }
 apartment.addEventListener("click", function () {
@@ -235,6 +244,15 @@ function onDocumentMouseDown(event) {
     });
   }
   if (dropSelected) {
+    dropSelected.traverse(function (child) {
+      if (child.isMesh) {
+        child.material.opacity = 1;
+      }
+    });
+    apartment.disabled = false;
+    shop.disabled = false;
+    officeOctagon.disabled = false;
+    officeLarge.disabled = false;
     dropSelected = null;
   }
 }
