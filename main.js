@@ -11,7 +11,7 @@ const log = document.getElementById("log");
 const snap = document.getElementById("snap");
 const drop = document.getElementById("drop");
 const choices = document.getElementById("choices");
-let camera, scene, renderer, controls, selected, transform;
+let camera, scene, renderer, controls, selected, transform, dropSelected;
 let objects = [];
 let models = {
   apartment: ["./assets/apartment.fbx", "apartment", 1, [20, 20, 20]],
@@ -99,7 +99,6 @@ function init() {
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
     controls.enabled = !event.value;
-    console.log(event.value);
   });
   transform.name = "transform";
   scene.add(transform);
@@ -159,7 +158,6 @@ log.addEventListener("click", function () {
   console.log(temp);
 });
 drop.addEventListener("click", function () {
-  // find the current choice in models
   let choice = models[curr_choice];
   model.load(choice[0], function (object) {
     object.traverse(function (child) {
@@ -174,7 +172,8 @@ drop.addEventListener("click", function () {
     object.name = choice[1] + "_" + choice[2];
     choice[2]++;
     object.scale.set(choice[3][0], choice[3][1], choice[3][2]);
-    object.position.set(Math.random() * 100 - 50, 0, Math.random() * 100 - 50);
+    object.position.set(pointer.x, 0, pointer.y);
+    dropSelected = object;
     scene.add(object);
     console.log("Added:" + object.name);
   });
@@ -213,6 +212,10 @@ function onDocumentMouseDown(event) {
         transform.attach(selected);
       }
     });
+  }
+  if (dropSelected) {
+    dropSelected.position.set(pointer.x, 0, pointer.y);
+    dropSelected = null;
   }
 }
 
@@ -319,6 +322,10 @@ function animate() {
     if (moveDown) {
       camera.translateY(-1);
     }
+  }
+
+  if (dropSelected) {
+    dropSelected.position.set(pointer.x, 0, pointer.y);
   }
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
