@@ -21,6 +21,8 @@ let camera,
   transform,
   dropSelected,
   ground;
+let rollOverMesh, rollOverMaterial;
+
 let objects = [];
 let models = {
   apartment: ["./assets/apartment.fbx", "apartment", 1, [20, 20, 20]],
@@ -63,6 +65,16 @@ function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x71b1fe);
 
+  const rollOverGeo = new THREE.PlaneGeometry(50, 50);
+  rollOverGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
+  rollOverGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 20, 0));
+  rollOverMaterial = new THREE.MeshBasicMaterial({
+    color: 0x1ed760,
+  });
+  rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
+  rollOverMesh.visible = false;
+  scene.add(rollOverMesh);
+
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
   hemiLight.name = "hemiLight";
@@ -88,7 +100,6 @@ function init() {
       side: THREE.DoubleSide,
     })
   );
-
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   ground.name = "ground";
@@ -220,9 +231,22 @@ function onWindowResize() {
 }
 
 function onDocumentMouseMove(event) {
+  const raycaster = new THREE.Raycaster();
   event.preventDefault();
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObjects(objects, false);
+  if (intersects.length > 0) {
+    const intersect = intersects[0];
+    rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
+    rollOverMesh.position
+      .divideScalar(2)
+      .floor()
+      .multiplyScalar(2)
+      .addScalar(-15);
+  }
+  renderer.render(scene, camera);
 }
 
 function onDocumentMouseDown(event) {
@@ -363,9 +387,11 @@ function animate() {
   }
 
   if (dropSelected) {
-    let x = pointer.x * 500 - 20;
-    let y = -1 * (pointer.y * 500 + 20);
-    dropSelected.position.set(x, 0, y);
+    dropSelected.position.set(
+      rollOverMesh.position.x,
+      0,
+      rollOverMesh.position.z
+    );
   }
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
