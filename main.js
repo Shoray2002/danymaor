@@ -67,7 +67,7 @@ function init() {
 
   const rollOverGeo = new THREE.PlaneGeometry(50, 50);
   rollOverGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
-  rollOverGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 20, 0));
+  rollOverGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 10, 0));
   rollOverMaterial = new THREE.MeshBasicMaterial({
     color: 0x1ed760,
   });
@@ -125,10 +125,10 @@ function init() {
   scene.add(transform);
 
   window.addEventListener("resize", onWindowResize);
+  document.addEventListener("mousemove", onDocumentMouseMove);
   document.addEventListener("click", onDocumentMouseDown);
   document.addEventListener("keydown", onDocumentKeyDown);
   document.addEventListener("keyup", onDocumentKeyUp);
-  document.addEventListener("mousemove", onDocumentMouseMove);
 }
 
 scale.addEventListener("click", function () {
@@ -238,15 +238,13 @@ function onDocumentMouseMove(event) {
   raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObjects(objects, false);
   if (intersects.length > 0) {
-    const intersect = intersects[0];
-    rollOverMesh.position.copy(intersect.point).add(intersect.face.normal);
-    rollOverMesh.position
-      .divideScalar(2)
-      .floor()
-      .multiplyScalar(2)
-      .addScalar(-15);
+    const intersect = intersects[intersects.length - 1];
+    rollOverMesh.position.set(intersect.point.x, 0, intersect.point.z);
+    console.log(intersect.point);
+    rollOverMesh.position.divideScalar(2).floor().multiplyScalar(2);
+    rollOverMesh.position.x -= 15;
+    rollOverMesh.position.z += 15;
   }
-  renderer.render(scene, camera);
 }
 
 function onDocumentMouseDown(event) {
@@ -273,6 +271,11 @@ function onDocumentMouseDown(event) {
         child.material.opacity = 1;
       }
     });
+    dropSelected.position.set(
+      rollOverMesh.position.x,
+      0,
+      rollOverMesh.position.z
+    );
     apartment.disabled = false;
     shop.disabled = false;
     officeOctagon.disabled = false;
