@@ -240,7 +240,6 @@ function onDocumentMouseMove(event) {
   if (intersects.length > 0) {
     const intersect = intersects[intersects.length - 1];
     rollOverMesh.position.set(intersect.point.x, 0, intersect.point.z);
-    console.log(intersect.point);
     rollOverMesh.position.divideScalar(2).floor().multiplyScalar(2);
     rollOverMesh.position.x -= 15;
     rollOverMesh.position.z += 15;
