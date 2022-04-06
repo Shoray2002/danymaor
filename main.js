@@ -1,8 +1,9 @@
 import * as THREE from "three";
+import TWEEN from "https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.5.0/dist/tween.esm.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
-
+import { TOP, BOTTOM, FRONT, BACK, LEFT, RIGHT } from "./orientations.js";
 const scale = document.getElementById("scale");
 const rotate = document.getElementById("rotate");
 const translate = document.getElementById("translate");
@@ -94,7 +95,7 @@ function init() {
   scene.add(dirLight);
 
   ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(1000, 1000),
+    new THREE.BoxGeometry(1000, 1000, 1),
     new THREE.MeshPhongMaterial({
       color: 0x6d9ec8,
       side: THREE.DoubleSide,
@@ -395,9 +396,12 @@ function animate() {
       rollOverMesh.position.z
     );
   }
+  TWEEN.update();
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
+
+// view Cube
 
 var cube = document.querySelector(".cube");
 const top = document.getElementById("top");
@@ -408,9 +412,55 @@ const front = document.getElementById("front");
 const back = document.getElementById("back");
 var mat = new THREE.Matrix4();
 
+const tweenCamera = (orientation) => {
+  const { offsetFactor, axisAngle } = orientation;
+  const offsetUnit = camera.position.length();
+  const offset = new THREE.Vector3(
+    offsetUnit * offsetFactor.x,
+    offsetUnit * offsetFactor.y,
+    offsetUnit * offsetFactor.z
+  );
+
+  const center = new THREE.Vector3();
+  const finishPosition = center.add(offset);
+
+  const positionTween = new TWEEN.Tween(camera.position)
+    .to(finishPosition, 300)
+    .easing(TWEEN.Easing.Circular.Out);
+
+  const euler = new THREE.Euler(axisAngle.x, axisAngle.y, axisAngle.z);
+
+  // rotate camera too!
+  const finishQuaternion = new THREE.Quaternion()
+    .copy(camera.quaternion)
+    .setFromEuler(euler);
+
+  const quaternionTween = new TWEEN.Tween(camera.quaternion)
+    .to(finishQuaternion, 300)
+    .easing(TWEEN.Easing.Circular.Out);
+
+  positionTween.start();
+  quaternionTween.start();
+  // camera.position.set(camera.position);
+};
+
 top.addEventListener("click", function () {
-  // translate to top
-  console.log("top");
+  tweenCamera(TOP);
+});
+bottom.addEventListener("click", function () {
+  tweenCamera(BOTTOM);
+});
+right.addEventListener("click", function () {
+  tweenCamera(RIGHT);
+});
+left.addEventListener("click", function () {
+  tweenCamera(LEFT);
+});
+front.addEventListener("click", function () {
+  tweenCamera(FRONT);
+});
+back.addEventListener("click", function () {
+  tweenCamera(BACK);
 });
 
 renderer.setAnimationLoop(() => {
