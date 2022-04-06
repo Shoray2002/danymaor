@@ -64,11 +64,11 @@ img:hover {
 }
 
 .scene {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Old versions of Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
   width: 150px;
   height: 150px;
@@ -84,8 +84,7 @@ img:hover {
   height: 150px;
   position: relative;
   transform-style: preserve-3d;
-  transform: translateZ(-300px);
-  /* transition: transform 0.1s; */
+  transform: translateZ(-250px);
 }
 
 .cube__face {
@@ -93,7 +92,7 @@ img:hover {
   text-transform: uppercase;
   width: 150px;
   height: 150px;
-  border: 2px solid black;
+  border: 5px dashed rgb(0, 0, 0);
   line-height: 100px;
   font-size: 30px;
   font-weight: bold;
@@ -104,15 +103,15 @@ img:hover {
 }
 
 .cube__face--front {
-  background: rgba(0, 0, 255, 0.7);
+  background: rgba(255, 119, 0, 0.7);
 }
 
 .cube__face--right {
-  background: rgba(255, 0, 0, 0.7);
+  background: rgba(0, 136, 255, 0.7);
 }
 
 .cube__face--back {
-  background: rgba(0, 255, 255, 0.7);
+  background: rgb(255, 0, 51, 0.7);
 }
 
 .cube__face--left {
@@ -124,7 +123,7 @@ img:hover {
 }
 
 .cube__face--bottom {
-  background: rgba(255, 255, 0, 0.7);
+  background: rgba(171, 221, 34, 0.7);
 }
 
 .cube__face--front {

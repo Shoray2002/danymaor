@@ -14,6 +14,15 @@ const apartment = document.getElementById("apartment");
 const officeOctagon = document.getElementById("officeOctagon");
 const officeLarge = document.getElementById("officeLarge");
 const shop = document.getElementById("shop");
+
+let cube = document.querySelector(".cube");
+const top = document.getElementById("top");
+const bottom = document.getElementById("bottom");
+const left = document.getElementById("left");
+const right = document.getElementById("right");
+const front = document.getElementById("front");
+const back = document.getElementById("back");
+
 let camera,
   scene,
   renderer,
@@ -24,6 +33,7 @@ let camera,
   ground,
   base;
 let rollOverMesh, rollOverMaterial;
+let mat = new THREE.Matrix4();
 
 let objects = [];
 let models = {
@@ -160,7 +170,7 @@ rotate.addEventListener("click", function () {
 delete_object.addEventListener("click", function () {
   if (selected) {
     console.log("Deleted : " + selected.parent.name);
-    var selectedObject = scene.getObjectByName(selected.parent.name);
+    let selectedObject = scene.getObjectByName(selected.parent.name);
     scene.remove(selectedObject);
     objects.forEach((object) => {
       if (object.parent.name == selected.parent.name) {
@@ -184,7 +194,7 @@ snap.addEventListener("change", function () {
 });
 log.addEventListener("click", function () {
   let temp = [];
-  for (var i = 0; i < scene.children.length; i++) {
+  for (let i = 0; i < scene.children.length; i++) {
     temp.push(scene.children[i].name);
   }
   console.log(temp);
@@ -406,21 +416,14 @@ function animate() {
       rollOverMesh.position.z
     );
   }
+  mat.extractRotation(camera.matrixWorldInverse);
+  cube.style.transform = `translateZ(-300px) ${getCameraCSSMatrix(mat)}`;
   TWEEN.update();
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
 
 // view Cube
-
-var cube = document.querySelector(".cube");
-const top = document.getElementById("top");
-const bottom = document.getElementById("bottom");
-const left = document.getElementById("left");
-const right = document.getElementById("right");
-const front = document.getElementById("front");
-const back = document.getElementById("back");
-var mat = new THREE.Matrix4();
 
 const tweenCamera = (orientation) => {
   const { offsetFactor, axisAngle } = orientation;
@@ -433,7 +436,6 @@ const tweenCamera = (orientation) => {
 
   const center = new THREE.Vector3();
   const finishPosition = center.add(offset);
-
   const positionTween = new TWEEN.Tween(camera.position)
     .to(finishPosition, 300)
     .easing(TWEEN.Easing.Circular.Out);
@@ -450,7 +452,6 @@ const tweenCamera = (orientation) => {
 
   quaternionTween.start();
   positionTween.start();
-  renderer.render(scene, camera);
 };
 
 top.addEventListener("click", function () {
@@ -472,16 +473,8 @@ back.addEventListener("click", function () {
   tweenCamera(BACK);
 });
 
-renderer.setAnimationLoop(() => {
-  mat.extractRotation(camera.matrixWorldInverse);
-
-  cube.style.transform = `translateZ(-300px) ${getCameraCSSMatrix(mat)}`;
-
-  renderer.render(scene, camera);
-});
-
 function getCameraCSSMatrix(matrix) {
-  var elements = matrix.elements;
+  let elements = matrix.elements;
 
   return (
     "matrix3d(" +
