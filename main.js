@@ -98,7 +98,7 @@ function init() {
   ground = new THREE.Mesh(
     new THREE.PlaneGeometry(1000, 1000),
     new THREE.MeshPhongMaterial({
-      color: 0x6d9ec8
+      color: 0x6d9ec8,
     })
   );
   ground.rotation.x = -Math.PI / 2;
@@ -110,7 +110,7 @@ function init() {
   base = new THREE.Mesh(
     new THREE.BoxGeometry(1000, 1000, 2),
     new THREE.MeshPhongMaterial({
-      color: '0x6d9ec8',
+      color: 0x6d9ec8,
     })
   );
   base.rotation.x = -Math.PI / 2;
@@ -444,14 +444,13 @@ const tweenCamera = (orientation) => {
   const finishQuaternion = new THREE.Quaternion()
     .copy(camera.quaternion)
     .setFromEuler(euler);
-
   const quaternionTween = new TWEEN.Tween(camera.quaternion)
     .to(finishQuaternion, 300)
     .easing(TWEEN.Easing.Circular.Out);
 
-  positionTween.start();
   quaternionTween.start();
-  // camera.position.set(camera.position);
+  positionTween.start();
+  renderer.render(scene, camera);
 };
 
 top.addEventListener("click", function () {
