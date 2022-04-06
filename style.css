@@ -64,13 +64,13 @@ img:hover {
 }
 
 .scene {
-  width: 200px;
-  height: 200px;
-  margin: 10px;
+  width: 150px;
+  height: 150px;
+  margin: 5px;
   perspective: 400px;
   position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
 }
 
 .cube {

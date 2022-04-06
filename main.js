@@ -400,8 +400,15 @@ function animate() {
 }
 
 var cube = document.querySelector(".cube");
-
+const top = document.getElementById("top");
+const bottom = document.getElementById("bottom");
+const left = document.getElementById("left");
+const right = document.getElementById("right");
+const front = document.getElementById("front");
+const back = document.getElementById("back");
 var mat = new THREE.Matrix4();
+
+top.addEventListener()
 
 renderer.setAnimationLoop(() => {
   mat.extractRotation(camera.matrixWorldInverse);
