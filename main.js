@@ -21,7 +21,8 @@ let camera,
   selected,
   transform,
   dropSelected,
-  ground;
+  ground,
+  base;
 let rollOverMesh, rollOverMaterial;
 
 let objects = [];
@@ -95,10 +96,9 @@ function init() {
   scene.add(dirLight);
 
   ground = new THREE.Mesh(
-    new THREE.BoxGeometry(1000, 1000, 1),
+    new THREE.PlaneGeometry(1000, 1000),
     new THREE.MeshPhongMaterial({
-      color: 0x6d9ec8,
-      side: THREE.DoubleSide,
+      color: 0x6d9ec8
     })
   );
   ground.rotation.x = -Math.PI / 2;
@@ -107,6 +107,16 @@ function init() {
   objects.push(ground);
   scene.add(ground);
 
+  base = new THREE.Mesh(
+    new THREE.BoxGeometry(1000, 1000, 2),
+    new THREE.MeshPhongMaterial({
+      color: '0x6d9ec8',
+    })
+  );
+  base.rotation.x = -Math.PI / 2;
+  base.name = "base";
+  base.translateZ(-2);
+  scene.add(base);
   // initializing the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
