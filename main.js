@@ -408,7 +408,10 @@ const front = document.getElementById("front");
 const back = document.getElementById("back");
 var mat = new THREE.Matrix4();
 
-top.addEventListener()
+top.addEventListener("click", function () {
+  // translate to top
+  console.log("top");
+});
 
 renderer.setAnimationLoop(() => {
   mat.extractRotation(camera.matrixWorldInverse);
