@@ -271,19 +271,21 @@ function onDocumentMouseDown(event) {
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObjects(objects);
-  if (intersects.length > 1) {
+  if (intersects.length > 0) {
     console.log(intersects[0].object.parent.name);
     if (intersects[0].object.parent.name) {
       selected = intersects[0].object;
     }
-    selected.material.color.set(0x8fd3fe);
-    objects.forEach((object) => {
-      if (object !== selected && object.name !== "ground") {
-        object.material.color.set(0xffffff);
-      } else {
-        transform.attach(selected);
-      }
-    });
+    if (selected) {
+      selected.material.color.set(0x8fd3fe);
+      objects.forEach((object) => {
+        if (object !== selected && object.name !== "ground") {
+          object.material.color.set(0xffffff);
+        } else {
+          transform.attach(selected);
+        }
+      });
+    }
   }
   if (dropSelected) {
     dropSelected.traverse(function (child) {
