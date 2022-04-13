@@ -23,6 +23,22 @@ const right = document.getElementById("right");
 const front = document.getElementById("front");
 const back = document.getElementById("back");
 
+const ft = new THREE.TextureLoader().load("./assets/skybox/Front.bmp");
+const bk = new THREE.TextureLoader().load("./assets/skybox/Back.bmp");
+const up = new THREE.TextureLoader().load("./assets/skybox/Top.bmp");
+const dn = new THREE.TextureLoader().load("./assets/skybox/Bottom.bmp");
+const rt = new THREE.TextureLoader().load("./assets/skybox/Right.bmp");
+const lf = new THREE.TextureLoader().load("./assets/skybox/Left.bmp");
+
+const skyBoxMaterial = [
+  new THREE.MeshBasicMaterial({ map: bk, side: THREE.BackSide }),
+  new THREE.MeshBasicMaterial({ map: ft, side: THREE.BackSide }),
+  new THREE.MeshBasicMaterial({ map: up, side: THREE.BackSide }),
+  new THREE.MeshBasicMaterial({ map: dn, side: THREE.BackSide }),
+  new THREE.MeshBasicMaterial({ map: rt, side: THREE.BackSide }),
+  new THREE.MeshBasicMaterial({ map: lf, side: THREE.BackSide }),
+];
+
 let camera,
   scene,
   renderer,
@@ -31,7 +47,9 @@ let camera,
   transform,
   dropSelected,
   ground,
-  base;
+  base,
+  skybox,
+  skyboxGeo;
 let rollOverMesh, rollOverMaterial;
 let mat = new THREE.Matrix4();
 
@@ -76,7 +94,6 @@ function init() {
   // initializing the scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x71b1fe);
-
   const rollOverGeo = new THREE.PlaneGeometry(50, 50);
   rollOverGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
   rollOverGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 10, 0));
@@ -104,6 +121,10 @@ function init() {
   dirLight.shadow.mapSize.width = 1024 * 2;
   dirLight.shadow.mapSize.height = 1024 * 2;
   scene.add(dirLight);
+
+  skyboxGeo = new THREE.BoxGeometry(5000, 5000, 5000);
+  skybox = new THREE.Mesh(skyboxGeo, skyBoxMaterial);
+  scene.add(skybox);
 
   ground = new THREE.Mesh(
     new THREE.PlaneGeometry(1000, 1000),
