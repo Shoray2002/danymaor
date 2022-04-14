@@ -392,62 +392,6 @@ function onDocumentKeyUp(event) {
   }
 }
 
-// function to animate the scene
-function animate() {
-  if (selected) {
-    if (moveForward) {
-      selected.translateZ(-0.1);
-    }
-    if (moveBackward) {
-      selected.translateZ(0.1);
-    }
-    if (moveLeft) {
-      selected.translateX(-0.1);
-    }
-    if (moveRight) {
-      selected.translateX(0.1);
-    }
-    if (moveUp) {
-      selected.translateY(0.1);
-    }
-    if (moveDown) {
-      selected.translateY(-0.1);
-    }
-  } else {
-    if (moveForward) {
-      camera.translateZ(-1);
-    }
-    if (moveBackward) {
-      camera.translateZ(1);
-    }
-    if (moveLeft) {
-      camera.translateX(-1);
-    }
-    if (moveRight) {
-      camera.translateX(1);
-    }
-    if (moveUp) {
-      camera.translateY(1);
-    }
-    if (moveDown) {
-      camera.translateY(-1);
-    }
-  }
-
-  if (dropSelected) {
-    dropSelected.position.set(
-      rollOverMesh.position.x,
-      0,
-      rollOverMesh.position.z
-    );
-  }
-  mat.extractRotation(camera.matrixWorldInverse);
-  cube.style.transform = `translateZ(-300px) ${getCameraCSSMatrix(mat)}`;
-  TWEEN.update();
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-}
-
 // view Cube
 
 const tweenCamera = (orientation) => {
@@ -474,6 +418,8 @@ const tweenCamera = (orientation) => {
     .easing(TWEEN.Easing.Circular.Out);
   positionTween.start();
   quaternionTween.start();
+  camera.updateProjectionMatrix();
+  cube.style.transform = `translateZ(-300px) ${getCameraCSSMatrix(mat)}`;
 };
 
 front.addEventListener("click", function () {
@@ -536,4 +482,60 @@ function getCameraCSSMatrix(matrix) {
 
 function epsilon(value) {
   return Math.abs(value) < 1e-10 ? 0 : value;
+}
+
+// function to animate the scene
+function animate() {
+  if (selected) {
+    if (moveForward) {
+      selected.translateZ(-0.1);
+    }
+    if (moveBackward) {
+      selected.translateZ(0.1);
+    }
+    if (moveLeft) {
+      selected.translateX(-0.1);
+    }
+    if (moveRight) {
+      selected.translateX(0.1);
+    }
+    if (moveUp) {
+      selected.translateY(0.1);
+    }
+    if (moveDown) {
+      selected.translateY(-0.1);
+    }
+  } else {
+    if (moveForward) {
+      camera.translateZ(-1);
+    }
+    if (moveBackward) {
+      camera.translateZ(1);
+    }
+    if (moveLeft) {
+      camera.translateX(-1);
+    }
+    if (moveRight) {
+      camera.translateX(1);
+    }
+    if (moveUp) {
+      camera.translateY(1);
+    }
+    if (moveDown) {
+      camera.translateY(-1);
+    }
+  }
+
+  if (dropSelected) {
+    dropSelected.position.set(
+      rollOverMesh.position.x,
+      0,
+      rollOverMesh.position.z
+    );
+  }
+  mat.extractRotation(camera.matrixWorldInverse);
+  cube.style.transform = `translateZ(-300px) ${getCameraCSSMatrix(mat)}`;
+  TWEEN.update();
+  requestAnimationFrame(animate);
+  renderer.render(scene, camera);
 }
