@@ -23,6 +23,7 @@ const right = document.getElementById("right");
 const front = document.getElementById("front");
 const back = document.getElementById("back");
 
+// textures for the skybox
 const ft = new THREE.TextureLoader().load("./assets/skybox/Front.bmp");
 const bk = new THREE.TextureLoader().load("./assets/skybox/Back.bmp");
 const up = new THREE.TextureLoader().load("./assets/skybox/Top.bmp");
@@ -30,6 +31,8 @@ const dn = new THREE.TextureLoader().load("./assets/skybox/Bottom.bmp");
 const rt = new THREE.TextureLoader().load("./assets/skybox/Right.bmp");
 const lf = new THREE.TextureLoader().load("./assets/skybox/Left.bmp");
 
+// making materials for the skybox using the textures
+// side is set to BackSide so the texture is visible only inside the cube and not outside
 const skyBoxMaterial = [
   new THREE.MeshBasicMaterial({ map: bk, side: THREE.BackSide }),
   new THREE.MeshBasicMaterial({ map: ft, side: THREE.BackSide }),
@@ -89,7 +92,7 @@ function init() {
     1,
     100000
   );
-  camera.position.set(-80, 100, 200);
+  camera.position.set(-120, 200, 400);
 
   // initializing the scene
   scene = new THREE.Scene();
@@ -122,6 +125,7 @@ function init() {
   dirLight.shadow.mapSize.height = 1024 * 2;
   scene.add(dirLight);
 
+  // making a bog skybox and adding it to the scene
   skyboxGeo = new THREE.BoxGeometry(5000, 5000, 5000);
   skybox = new THREE.Mesh(skyboxGeo, skyBoxMaterial);
   scene.add(skybox);
@@ -135,6 +139,7 @@ function init() {
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   ground.name = "ground";
+
   objects.push(ground);
   scene.add(ground);
 
@@ -146,9 +151,7 @@ function init() {
   );
   base.rotation.x = -Math.PI / 2;
   base.name = "base";
-  base.translateZ(-2);
   scene.add(base);
-  // initializing the renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -156,7 +159,6 @@ function init() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.appendChild(renderer.domElement);
 
-  // initializing the controls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
   transform = new TransformControls(camera, renderer.domElement);
@@ -456,7 +458,6 @@ const tweenCamera = (orientation) => {
     offsetUnit * offsetFactor.y,
     offsetUnit * offsetFactor.z
   );
-
   const center = new THREE.Vector3();
   const finishPosition = center.add(offset);
   const positionTween = new TWEEN.Tween(camera.position)
@@ -465,18 +466,22 @@ const tweenCamera = (orientation) => {
 
   const euler = new THREE.Euler(axisAngle.x, axisAngle.y, axisAngle.z);
 
-  // rotate camera too!
   const finishQuaternion = new THREE.Quaternion()
     .copy(camera.quaternion)
     .setFromEuler(euler);
   const quaternionTween = new TWEEN.Tween(camera.quaternion)
     .to(finishQuaternion, 300)
     .easing(TWEEN.Easing.Circular.Out);
-
-  quaternionTween.start();
   positionTween.start();
+  quaternionTween.start();
 };
 
+front.addEventListener("click", function () {
+  tweenCamera(FRONT);
+});
+back.addEventListener("click", function () {
+  tweenCamera(BACK);
+});
 top.addEventListener("click", function () {
   tweenCamera(TOP);
 });
@@ -489,16 +494,9 @@ right.addEventListener("click", function () {
 left.addEventListener("click", function () {
   tweenCamera(LEFT);
 });
-front.addEventListener("click", function () {
-  tweenCamera(FRONT);
-});
-back.addEventListener("click", function () {
-  tweenCamera(BACK);
-});
 
 function getCameraCSSMatrix(matrix) {
   let elements = matrix.elements;
-
   return (
     "matrix3d(" +
     epsilon(elements[0]) +
