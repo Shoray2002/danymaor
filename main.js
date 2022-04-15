@@ -2,6 +2,7 @@ import * as THREE from "three";
 import TWEEN from "https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.5.0/dist/tween.esm.js";
 import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
+
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
 import { TOP, BOTTOM, FRONT, BACK, LEFT, RIGHT } from "./orientations.js";
 const scale = document.getElementById("scale");
@@ -161,6 +162,13 @@ function init() {
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 0, 0);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+  controls.screenSpacePanning = false;
+
+  controls.minDistance = 100;
+  controls.maxDistance = 2500;
+  controls.maxPolarAngle = Math.PI;
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
     controls.enabled = !event.value;
@@ -536,6 +544,7 @@ function animate() {
   mat.extractRotation(camera.matrixWorldInverse);
   cube.style.transform = `translateZ(-300px) ${getCameraCSSMatrix(mat)}`;
   TWEEN.update();
+  controls.update();
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
 }
