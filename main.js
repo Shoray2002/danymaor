@@ -496,41 +496,41 @@ function epsilon(value) {
 function animate() {
   if (selected) {
     if (moveForward) {
-      selected.translateZ(-0.1);
+      selected.translateZ(-0.5);
     }
     if (moveBackward) {
-      selected.translateZ(0.1);
+      selected.translateZ(0.5);
     }
     if (moveLeft) {
-      selected.translateX(-0.1);
+      selected.translateX(-0.5);
     }
     if (moveRight) {
-      selected.translateX(0.1);
+      selected.translateX(0.5);
     }
     if (moveUp) {
-      selected.translateY(0.1);
+      selected.translateY(0.5);
     }
     if (moveDown) {
-      selected.translateY(-0.1);
+      selected.translateY(-0.5);
     }
   } else {
     if (moveForward) {
-      camera.translateZ(-1);
+      scene.translateZ(-2);
     }
     if (moveBackward) {
-      camera.translateZ(1);
+      scene.translateZ(2);
     }
     if (moveLeft) {
-      camera.translateX(-1);
+      scene.translateX(-2);
     }
     if (moveRight) {
-      camera.translateX(1);
+      scene.translateX(2);
     }
     if (moveUp) {
-      camera.translateY(1);
+      scene.translateY(2);
     }
     if (moveDown) {
-      camera.translateY(-1);
+      scene.translateY(-2);
     }
   }
 
