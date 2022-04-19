@@ -576,6 +576,12 @@ function animate() {
         })
       );
     }
+    if (moveUp) {
+      group.translateY(0.5);
+    }
+    if (moveDown) {
+      group.translateY(-0.5);
+    }
   }
 
   if (dropSelected) {
