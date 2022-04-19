@@ -405,6 +405,9 @@ function onDocumentKeyUp(event) {
     case 81:
       moveDown = false;
       break;
+    // b
+    case 66:
+      console.log("b");
   }
 }
 
@@ -500,7 +503,6 @@ function epsilon(value) {
   return Math.abs(value) < 1e-10 ? 0 : value;
 }
 
-// function to animate the scene
 function animate() {
   if (selected) {
     if (moveForward) {
@@ -521,27 +523,60 @@ function animate() {
     if (moveDown) {
       selected.translateY(-0.5);
     }
-  } 
-  // else {
-  //   if (moveForward) {
-  //     group.translateZ(-2);
-  //   }
-  //   if (moveBackward) {
-  //     group.translateZ(2);
-  //   }
-  //   if (moveLeft) {
-  //     group.translateX(-2);
-  //   }
-  //   if (moveRight) {
-  //     group.translateX(2);
-  //   }
-  //   if (moveUp) {
-  //     group.translateY(2);
-  //   }
-  //   if (moveDown) {
-  //     group.translateY(-2);
-  //   }
-  // }
+  } else {
+    if (moveForward) {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "ArrowUp",
+          keyCode: 38,
+          code: "ArrowUp",
+          which: 38,
+          shiftKey: false,
+          ctrlKey: false,
+          metaKey: false,
+        })
+      );
+    }
+    if (moveBackward) {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "ArrowDown",
+          keyCode: 40,
+          code: "ArrowDown",
+          which: 40,
+          shiftKey: false,
+          ctrlKey: false,
+          metaKey: false,
+        })
+      );
+    }
+    if (moveLeft) {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "ArrowLeft",
+          keyCode: 37,
+          code: "ArrowLeft",
+          which: 37,
+          shiftKey: false,
+          ctrlKey: false,
+          metaKey: false,
+        })
+      );
+    }
+    if (moveRight) {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "ArrowRight",
+          keyCode: 39,
+          code: "ArrowRight",
+          which: 39,
+          shiftKey: false,
+          ctrlKey: false,
+          metaKey: false,
+        })
+      );
+    }
+  }
 
   if (dropSelected) {
     dropSelected.position.set(
