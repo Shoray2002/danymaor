@@ -53,10 +53,10 @@ let camera,
   ground,
   base,
   skybox,
-  skyboxGeo;
+  skyboxGeo,
+  group;
 let rollOverMesh, rollOverMaterial;
 let mat = new THREE.Matrix4();
-
 let objects = [];
 let models = {
   apartment: ["./assets/apartment.fbx", "apartment", 1, [20, 20, 20]],
@@ -98,6 +98,9 @@ function init() {
   // initializing the scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x71b1fe);
+  group = new THREE.Group();
+  group.name = "group";
+
   const rollOverGeo = new THREE.PlaneGeometry(50, 50);
   rollOverGeo.applyMatrix4(new THREE.Matrix4().makeRotationX(-Math.PI / 2));
   rollOverGeo.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 10, 0));
@@ -106,12 +109,14 @@ function init() {
   });
   rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
   rollOverMesh.visible = false;
-  scene.add(rollOverMesh);
+  // scene.add(rollOverMesh);
+  group.add(rollOverMesh);
 
   const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
   hemiLight.position.set(0, 200, 0);
   hemiLight.name = "hemiLight";
   scene.add(hemiLight);
+  // group.add(hemiLight);
 
   const dirLight = new THREE.DirectionalLight(0xffffff);
   dirLight.intensity = 0.8;
@@ -125,11 +130,13 @@ function init() {
   dirLight.shadow.mapSize.width = 1024 * 2;
   dirLight.shadow.mapSize.height = 1024 * 2;
   scene.add(dirLight);
+  // group.add(dirLight);
 
   // making a bog skybox and adding it to the scene
   skyboxGeo = new THREE.BoxGeometry(5000, 5000, 5000);
   skybox = new THREE.Mesh(skyboxGeo, skyBoxMaterial);
   scene.add(skybox);
+  // group.add(skybox);
 
   ground = new THREE.Mesh(
     new THREE.PlaneGeometry(1000, 1000),
@@ -142,7 +149,8 @@ function init() {
   ground.name = "ground";
 
   objects.push(ground);
-  scene.add(ground);
+  // scene.add(ground);
+  group.add(ground);
 
   base = new THREE.Mesh(
     new THREE.BoxGeometry(1000, 1000, 2),
@@ -152,7 +160,7 @@ function init() {
   );
   base.rotation.x = -Math.PI / 2;
   base.name = "base";
-  scene.add(base);
+  // scene.add(base);
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -168,14 +176,14 @@ function init() {
 
   controls.minDistance = 100;
   controls.maxDistance = 2500;
-  controls.maxPolarAngle = Math.PI;
+  controls.maxPolarAngle = Math.PI / 2;
   transform = new TransformControls(camera, renderer.domElement);
   transform.addEventListener("dragging-changed", function (event) {
     controls.enabled = !event.value;
   });
   transform.name = "transform";
   scene.add(transform);
-
+  scene.add(group);
   window.addEventListener("resize", onWindowResize);
   document.addEventListener("mousemove", onDocumentMouseMove);
   document.addEventListener("click", onDocumentMouseDown);
@@ -201,8 +209,8 @@ rotate.addEventListener("click", function () {
 delete_object.addEventListener("click", function () {
   if (selected) {
     console.log("Deleted : " + selected.parent.name);
-    let selectedObject = scene.getObjectByName(selected.parent.name);
-    scene.remove(selectedObject);
+    let selectedObject = group.getObjectByName(selected.parent.name);
+    group.remove(selectedObject);
     objects.forEach((object) => {
       if (object.parent.name == selected.parent.name) {
         objects.splice(objects.indexOf(object), 1);
@@ -225,8 +233,8 @@ snap.addEventListener("change", function () {
 });
 log.addEventListener("click", function () {
   let temp = [];
-  for (let i = 0; i < scene.children.length; i++) {
-    temp.push(scene.children[i].name);
+  for (let i = 0; i < gropu.children.length; i++) {
+    temp.push(gropu.children[i].name);
   }
   console.log(temp);
 });
@@ -251,7 +259,7 @@ function addModel() {
     object.scale.set(choice[3][0], choice[3][1], choice[3][2]);
     object.position.set(pointer.x, 0, pointer.y);
     dropSelected = object;
-    scene.add(object);
+    group.add(object);
     // disable img buttons
     apartment.disabled = true;
     shop.disabled = true;
@@ -293,8 +301,8 @@ function onDocumentMouseMove(event) {
     const intersect = intersects[intersects.length - 1];
     rollOverMesh.position.set(intersect.point.x, 0, intersect.point.z);
     rollOverMesh.position.divideScalar(2).floor().multiplyScalar(2);
-    rollOverMesh.position.x -= 15;
-    rollOverMesh.position.z += 15;
+    rollOverMesh.position.x -= 15 + group.position.x;
+    rollOverMesh.position.z += 15 + group.position.z;
   }
 }
 
@@ -302,7 +310,7 @@ function onDocumentMouseDown(event) {
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObjects(objects);
-  if (intersects.length > 0) {
+  if (intersects.length > 1) {
     console.log(intersects[0].object.parent.name);
     if (intersects[0].object.parent.name) {
       selected = intersects[0].object;
@@ -515,22 +523,22 @@ function animate() {
     }
   } else {
     if (moveForward) {
-      scene.translateZ(-2);
+      group.translateZ(-2);
     }
     if (moveBackward) {
-      scene.translateZ(2);
+      group.translateZ(2);
     }
     if (moveLeft) {
-      scene.translateX(-2);
+      group.translateX(-2);
     }
     if (moveRight) {
-      scene.translateX(2);
+      group.translateX(2);
     }
     if (moveUp) {
-      scene.translateY(2);
+      group.translateY(2);
     }
     if (moveDown) {
-      scene.translateY(-2);
+      group.translateY(-2);
     }
   }
 
