@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import TWEEN from "https://cdn.jsdelivr.net/npm/@tweenjs/tween.js@18.5.0/dist/tween.esm.js";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls } from "https://cdn.skypack.dev/three@0.132.2/examples/jsm/controls/OrbitControls.js";
 import { TransformControls } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/TransformControls.js";
 
 import { FBXLoader } from "https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/loaders/FBXLoader.js";
@@ -173,7 +173,7 @@ function init() {
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
   controls.screenSpacePanning = false;
-
+  controls.listenToKeyEvents(window);
   controls.minDistance = 100;
   controls.maxDistance = 2500;
   controls.maxPolarAngle = Math.PI / 2;
@@ -301,8 +301,8 @@ function onDocumentMouseMove(event) {
     const intersect = intersects[intersects.length - 1];
     rollOverMesh.position.set(intersect.point.x, 0, intersect.point.z);
     rollOverMesh.position.divideScalar(2).floor().multiplyScalar(2);
-    rollOverMesh.position.x -= 15 + group.position.x;
-    rollOverMesh.position.z += 15 + group.position.z;
+    rollOverMesh.position.x -= 15 - (scene.position.x - group.position.x);
+    rollOverMesh.position.z += 15 - (scene.position.z - group.position.z);
   }
 }
 
@@ -347,19 +347,19 @@ function onDocumentMouseDown(event) {
 
 function onDocumentKeyDown(event) {
   switch (event.keyCode) {
-    case 38: // up
+    // case 38: // up
     case 87: // w
       moveForward = true;
       break;
-    case 37: // left
+    // case 37: // left
     case 65: // a
       moveLeft = true;
       break;
-    case 40: // down
+    // case 40: // down
     case 83: // s
       moveBackward = true;
       break;
-    case 39: // right
+    // case 39: // right
     case 68: // d
       moveRight = true;
       break;
@@ -521,26 +521,27 @@ function animate() {
     if (moveDown) {
       selected.translateY(-0.5);
     }
-  } else {
-    if (moveForward) {
-      group.translateZ(-2);
-    }
-    if (moveBackward) {
-      group.translateZ(2);
-    }
-    if (moveLeft) {
-      group.translateX(-2);
-    }
-    if (moveRight) {
-      group.translateX(2);
-    }
-    if (moveUp) {
-      group.translateY(2);
-    }
-    if (moveDown) {
-      group.translateY(-2);
-    }
-  }
+  } 
+  // else {
+  //   if (moveForward) {
+  //     group.translateZ(-2);
+  //   }
+  //   if (moveBackward) {
+  //     group.translateZ(2);
+  //   }
+  //   if (moveLeft) {
+  //     group.translateX(-2);
+  //   }
+  //   if (moveRight) {
+  //     group.translateX(2);
+  //   }
+  //   if (moveUp) {
+  //     group.translateY(2);
+  //   }
+  //   if (moveDown) {
+  //     group.translateY(-2);
+  //   }
+  // }
 
   if (dropSelected) {
     dropSelected.position.set(
