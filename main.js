@@ -417,9 +417,9 @@ const tweenCamera = (orientation) => {
   const { offsetFactor, axisAngle } = orientation;
   const offsetUnit = camera.position.length();
   const offset = new THREE.Vector3(
-    offsetUnit * offsetFactor.x,
-    offsetUnit * offsetFactor.y,
-    offsetUnit * offsetFactor.z
+    (offsetUnit - (scene.position.x - group.position.x)) * offsetFactor.x,
+    (offsetUnit - (scene.position.y - group.position.y)) * offsetFactor.y,
+    (offsetUnit - (scene.position.z - group.position.z)) * offsetFactor.z
   );
   const center = new THREE.Vector3();
   const finishPosition = center.add(offset);
